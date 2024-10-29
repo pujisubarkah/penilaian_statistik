@@ -9,8 +9,7 @@ function Navbar() {
 
   const menu = [
     { name: 'Beranda', path: '/' },
-    { name: 'EPSS Internal', path: '/EPSS' },
-    { name: 'Bantuan', path: '/Bantuan' },
+    { name: 'EPSS LAN', path: '/EPSS' },
     { name: 'Penilaian Mandiri', path: '/Penilaian' }
   ];
 
@@ -36,7 +35,7 @@ function Navbar() {
   };
 
   return (
-    <nav className="flex justify-between items-center p-4 bg-[darkred] shadow-md">
+    <nav className="flex justify-between items-center p-4 bg-teal-700 shadow-md">
       <div className="flex items-center">
         <img src="/lanri.png" alt="Logo" className="h-12 mr-3 p-2" />
         <span className="text-white font-bold text-2xl">PENILAIAN EPSS UNIT KERJA</span>
@@ -50,7 +49,7 @@ function Navbar() {
               className={({ isActive }) =>
                 isActive
                   ? "font-bold text-white no-underline p-2 rounded"
-                  : "text-white no-underline hover:text-[darkred] hover:bg-white transition p-2 rounded"
+                  : "text-white no-underline hover:text-teal-700 hover:bg-white transition p-2 rounded"
               }
             >
               {item.name}
@@ -67,7 +66,7 @@ function Navbar() {
         ) : (
           <button
             onClick={openLoginModal}
-            className="border-2 border-white bg-[darkred] text-white py-2 px-4 rounded-lg cursor-pointer text-lg hover:bg-white hover:text-[darkred] transition"
+            className="border-2 border-white bg-teal-700 text-white py-2 px-4 rounded-lg cursor-pointer text-lg hover:bg-white hover:text-teal-700 transition"
           >
             Masuk
           </button>
