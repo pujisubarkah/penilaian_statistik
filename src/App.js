@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home'; // Halaman beranda
 import EPSS from './pages/EPSS'; // Halaman EPSS Internal
-import Bantuan from './pages/Bantuan'; // Halaman Bantuan
 import Penilaian from './pages/Penilaian'; // Halaman Penilaian Mandiri
 
 function App() {
@@ -17,7 +16,6 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/EPSS" element={<EPSS />} />
-          <Route path="/Bantuan" element={<Bantuan />} />
           <Route path="/Penilaian" element={<Penilaian />} />
         </Routes>
       </div>
