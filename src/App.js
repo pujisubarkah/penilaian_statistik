@@ -1,24 +1,27 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Home from './pages/Home'; // Halaman beranda
+import EPSS from './pages/EPSS'; // Halaman EPSS Internal
+import Bantuan from './pages/Bantuan'; // Halaman Bantuan
+import Penilaian from './pages/Penilaian'; // Halaman Penilaian Mandiri
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div>
+        {/* Navbar akan selalu terlihat di bagian atas halaman */}
+        <Navbar />
+        
+        {/* Routes untuk konten halaman */}
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/EPSS" element={<EPSS />} />
+          <Route path="/Bantuan" element={<Bantuan />} />
+          <Route path="/Penilaian" element={<Penilaian />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
