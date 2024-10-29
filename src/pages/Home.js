@@ -72,7 +72,7 @@ function Home() {
           </p>
         </div>
         <div className="border p-4 rounded-lg">
-          <img src="https://placehold.co/800x600" alt="Document preview showing a table with data and text" className="w-full"/>
+          <iframe src="https://drive.google.com/file/d/1Y-rq3pgWlXC2Fe4tMeFEwO7ENI0MF0sE/preview" width="640" height="480" allow="autoplay"></iframe>
         </div>
         </div>
       </div>
