@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import Modal from 'react-modal';
-import { useUser } from '../hooks/useUser'; // Pastikan path ini benar
+import { useUser } from '../hooks/useUser'; // Ensure this path is correct
+import Login from './Login'; // Import the Login component
 
 function Navbar() {
   const navigate = useNavigate();
-  const { user, logout } = useUser(); // Pastikan useUser diimpor dengan benar
+  const { user, logout } = useUser(); // Ensure useUser is imported correctly
 
   const menu = [
     { name: 'Beranda', path: '/' },
@@ -13,20 +13,15 @@ function Navbar() {
     { name: 'Penilaian Mandiri', path: '/Penilaian' }
   ];
 
-  Modal.setAppElement('#root');
-  const [isLoginModalOpen, setLoginModalOpen] = useState(false);
-  const [isRegisterModalOpen, setRegisterModalOpen] = useState(false);
+  const [isLoginVisible, setLoginVisible] = useState(false);
+  const [isRegisterVisible, setRegisterVisible] = useState(false);
 
-  const openLoginModal = () => {
-    setLoginModalOpen(true);
+  const openLogin = () => {
+    setLoginVisible(true);
   };
 
-  const closeLoginModal = () => {
-    setLoginModalOpen(false);
-  };
-
-  const closeRegisterModal = () => {
-    setRegisterModalOpen(false);
+  const closeLogin = () => {
+    setLoginVisible(false);
   };
 
   const handleLogout = () => {
@@ -65,7 +60,7 @@ function Navbar() {
           </span>
         ) : (
           <button
-            onClick={openLoginModal}
+            onClick={openLogin}
             className="border-2 border-white bg-teal-700 text-white py-2 px-4 rounded-lg cursor-pointer text-lg hover:bg-white hover:text-teal-700 transition"
           >
             Masuk
@@ -73,7 +68,15 @@ function Navbar() {
         )}
       </div>
 
-      {/* Modal Login dan Register (dihapus atau disesuaikan) */}
+      {/* Login Form Overlay */}
+      {isLoginVisible && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-transparent p-8 rounded shadow-lg w-1/3">
+            <Login closeModal={closeLogin} />
+          
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
