@@ -37,13 +37,56 @@ function Penilaian() {
         </div>
       </div>
 
+      <div className="p-6 bg-gray-100">
+      <div className="grid grid-cols-4 gap-4 mt-4">
+        {/* First Column (Left) */}
+        <div className="col-span-2 bg-white shadow-md p-4">
+          <div className="flex flex-col space-y-4">
+            {/* Kegiatan 1 */}
+            <div>
+              
+              <p className="m-0 text-gray-800 text-lg font-normal">
+                {/* Isi dari database untuk Kegiatan 1 */}
+              </p>
+              <span className="text-blue-600 text-xs">
+                {/* Tahun dan Instansi dari database */}
+              </span>
+            </div>
+            {/* Kegiatan 2 */}
+            <div>
+              
+              <p className="m-0 text-gray-800 text-lg font-normal">
+                {/* Isi dari database untuk Kegiatan 2 */}
+              </p>
+              <span className="text-blue-600 text-xs">
+                {/* Tahun dan Instansi dari database */}
+              </span>
+            </div>
+          </div>
+        </div>
 
-      
+          {/* Second Column (Right) */}
+          <div className="bg-teal-700 text-white p-4 rounded-md shadow-md">
+          <div className="text-4xl font-semibold">38</div>
+          <div>Indikator sudah lengkap diperiksa</div>
+          
+          {/* Progress Bar */}
+          <div className="my-2">
+            <div className="bg-gray-300 h-2 rounded">
+              <div
+                className="bg-white h-full rounded"
+                style={{ width: '75%' }} // Change this value for the progress percentage
+              ></div>
+            </div>
+          </div>
 
+          {/* Progress Percentage */}
+          <div className="text-sm">75% Completed</div>
+        </div>
+      </div>
+    </div>
+  
 
-
-
-      {/* Progress Bar */}
       <div className="card-body">
         <div className="progress progress-white my-2" style={{ height: '4px' }}>
           <div
@@ -61,4 +104,5 @@ function Penilaian() {
 }
 
 export default Penilaian;
+
 
