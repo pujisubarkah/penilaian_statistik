@@ -38,7 +38,7 @@ function Navbar() {
     <nav className="flex justify-between items-center p-4 bg-teal-700 shadow-md">
       <div className="flex items-center">
         <img src="/lanri.png" alt="Logo" className="h-12 mr-3 p-2" />
-        <span className="text-white font-bold text-2xl">PENILAIAN EPSS UNIT KERJA</span>
+        <span className="text-white font-bold text-2xl">PEMBINAAN STATISTIK SEKTORAL LANRI</span>
       </div>
 
       <ul className="flex gap-6 list-none font-open-sans text-lg text-white">
