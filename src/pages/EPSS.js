@@ -1,4 +1,5 @@
 import React from 'react';
+import Carousel from '../components/Carousel';
 
 function EPSS() {
   return (
@@ -10,6 +11,19 @@ function EPSS() {
           <p className="text-2xl mt-2">Pembinaan Statistik Sektoral dan Mini EPSS Internal Lembaga Administrasi Negara</p>
         </div>
       </div>
+      <div className="container mx-auto p-6">
+        <h1 className="text-2xl font-bold mb-4">EVALUASI PENYELENGGARAAN STATISTIK SEKTORAL LAN</h1>
+        <p className="mb-4">
+        Kegiatan ini merupakan salah satu bentuk Penguatan tata kelola data pemerintah untuk menghasilkan data yang akurat, mutakhir, terpadu, dapat dipertanggungjawabkan, mudah diakses dan dibagi-pakaikan antar Instansi Pemerintah, selain itu Penguatan Sistem Statistik Nasional (SSN) melalui penyelenggaraan statistik dasar, statistik sektoral, dan statistik khusus untuk menghasilkan data statistik berkualitas serta Pencapaian sasaran RB Nasional “Birokrasi yang bersih dan akuntabel” melalui pembangunan data pemerintah untuk digunakan dalam penyusunan kebijakan berbasis data/fakta.
+        </p>
+        <p className="mb-4">
+        Tujuan dari Evaluasi Penyelenggaran Statistik Sektoral LAN adalah Mengukur capaian kinerja penyelenggaraan Satu Data LAN dan data statistik sektoral pada unit kerja di Lingkungan LAN, mendapatkan satu ukuran terpenuhinya prasyarat penyelenggaraan Satu Data dan statistik serta digunakan untuk menyusun strategi pembinaan data oleh Walidata pada unit kerja di lingkungan LAN.
+        </p>
+        </div>
+
+
+
+
       <div className="container mx-auto p-6">
         <h1 className="text-2xl font-bold mb-4">INDEKS PEMBANGUNAN STATISTIK LANRI</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
@@ -24,8 +38,9 @@ function EPSS() {
             <a href="https://drive.google.com/uc?export=download&id=1g3MbdEEPtLP7pUeX9SCuNLv8GGXv8Bb1" className="mt-2 inline-block bg-teal-700 text-white text-center py-2 px-4 rounded hover:bg-teal-800">Unduh EPSS LAN 2024</a>
           </div>
         </div>
+        <Carousel />
       </div>
-    </div>
+          </div>
   );
 }
 

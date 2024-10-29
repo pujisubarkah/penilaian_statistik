@@ -2,107 +2,82 @@ import React from 'react';
 
 function Penilaian() {
   return (
-    <div className="p-6 bg-gray-100">
-      {/* Header */}
-      <>
-        <p className="p-0 m-0 mt-4" style={{ textAlign: 'left', fontSize: '13pt', fontWeight: 500, color: 'rgb(31, 34, 37)' }}>
-          PENILAIAN MANDIRI
-        </p>
-        <p className="p-0 mb-2" style={{ textAlign: 'left', fontSize: '11pt' }}>
-          Penilaian Mandiri Lembaga Administrasi Negara
-        </p>
-      </>
-
-      {/* Notification Banner */}
-      <div className="bg-teal-700  p-4 rounded-md  text-white p-6 mt-4">
-        Penilaian Mandiri EPSS 2024 sudah berakhir. Terima kasih atas kerjasama dan partisipasi aktif Bapak/Ibu.
-      </div>
-
-      {/* Two-column layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-        <div className="bg-white p-4 rounded-md shadow-md">
-          <div className="card" style={{ backgroundColor: 'rgb(249, 250, 252)' }}>
-            <div className="card-body p-1">
-              <p className="text-center p-0 m-0 ps-2">Kegiatan Statistik</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-md shadow-md">
-          <div className="card" style={{ backgroundColor: 'rgb(249, 250, 252)' }}>
-            <div className="card-body p-1">
-              <p className="text-center p-0 m-0 ps-2">Progres Penilaian Mandiri</p>
-            </div>
-          </div>
+    <>
+      {/* Header Section */}
+      <div
+        className="relative bg-cover bg-center text-white p-6 mb-6"
+        style={{ backgroundImage: 'url(https://lan.go.id/wp-content/uploads/2022/06/WhatsApp-Image-2022-06-24-at-13.43.42-1024x682.jpeg)' }}
+      >
+        <div className="absolute inset-0 bg-teal-700 opacity-75"></div>
+        <div className="relative z-10 text-center">
+          <h1 className="text-4xl font-bold">EVALUASI PENYELENGGARAAN STATISTIK SEKTORAL</h1>
+          <p className="text-2xl mt-2">
+            Pembinaan Statistik Sektoral dan Mini EPSS Internal Lembaga Administrasi Negara
+          </p>
         </div>
       </div>
 
-      <div className="p-6 bg-gray-100">
-      <div className="grid grid-cols-4 gap-4 mt-4">
-        {/* First Column (Left) */}
-        <div className="col-span-2 bg-white shadow-md p-4">
-          <div className="flex flex-col space-y-4">
-            {/* Kegiatan 1 */}
-            <div>
-              
-              <p className="m-0 text-gray-800 text-lg font-normal">
-                {/* Isi dari database untuk Kegiatan 1 */}
-              </p>
-              <span className="text-blue-600 text-xs">
-                {/* Tahun dan Instansi dari database */}
-              </span>
-            </div>
-            {/* Kegiatan 2 */}
-            <div>
-              
-              <p className="m-0 text-gray-800 text-lg font-normal">
-                {/* Isi dari database untuk Kegiatan 2 */}
-              </p>
-              <span className="text-blue-600 text-xs">
-                {/* Tahun dan Instansi dari database */}
-              </span>
-            </div>
-          </div>
+      {/* Main Container */}
+      <div className="container mx-auto p-6">
+        <h1 className="text-2xl font-bold mb-4">PENILAIAN MANDIRI</h1>
+        <p className="text-left text-md text-gray-700">Penilaian Mandiri Lembaga Administrasi Negara</p>
+
+        {/* Notification Banner */}
+        <div className="bg-teal-700 p-4 rounded-md text-white mt-4">
+          Penilaian Mandiri EPSS 2024 sudah berakhir. Terima kasih atas kerjasama dan partisipasi aktif Bapak/Ibu.
         </div>
 
-          {/* Second Column (Right) */}
-          <div className="bg-teal-700 text-white p-4 rounded-md shadow-md">
-          <div className="text-4xl font-semibold">38</div>
-          <div>Indikator sudah lengkap diperiksa</div>
-          
-          {/* Progress Bar */}
-          <div className="my-2">
-            <div className="bg-gray-300 h-2 rounded">
-              <div
-                className="bg-white h-full rounded"
-                style={{ width: '75%' }} // Change this value for the progress percentage
-              ></div>
+        {/* Two-Column Layout for Activities and Progress Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          {/* Activities Column */}
+          <div className="bg-white shadow-md p-4 md:col-span-2">
+            <div className="space-y-4">
+              {/* Replace with activity details from database */}
+              <div>
+                <p className="m-0 text-gray-800 text-lg font-normal">Kegiatan Statistik yang dilakukan</p>
+                <span className="text-blue-600 text-xs">Tahun dan Instansi</span>
+              </div>
             </div>
           </div>
 
-          {/* Progress Percentage */}
-          <div className="text-sm">75% Completed</div>
-        </div>
-      </div>
-    </div>
-  
+          {/* Progress Overview Column */}
+          <div className="bg-teal-700 text-white p-4 rounded-md shadow-md md:col-span-1">
+            <div className="text-4xl font-semibold">38</div>
+            <div>Indikator sudah lengkap diperiksa</div>
 
-      <div className="card-body">
-        <div className="progress progress-white my-2" style={{ height: '4px' }}>
-          <div
-            className="progress-bar"
-            role="progressbar"
-            aria-valuenow="100"
-            aria-valuemin="0"
-            aria-valuemax="100"
-            style={{ width: '100%' }}
-          ></div>
+            {/* Progress Bar */}
+            <div className="my-2 w-full bg-gray-300 h-2 rounded">
+              <div className="bg-white h-full rounded" style={{ width: '75%' }}></div>
+            </div>
+            <div className="text-sm">75% Completed</div>
+          </div>
+        </div>
+
+        {/* Notification Banner for IPS */}
+        <div className="bg-gray-300 p-4 rounded-md text-black font-bold mt-4">
+          Nilai Indeks Pembangunan Statistik (IPS) Unit Kerja.
+        </div>
+
+        {/* Two-Column Layout for Activities and Progress Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          {/* Activities Column with Table Placeholder */}
+          <div className="bg-white shadow-md p-4 md:col-span-2">
+            <h2 className="text-lg font-semibold mb-4">Kegiatan Statistik</h2>
+         
+            
+          </div>
+
+          {/* Progress Overview Column with Radar Chart Placeholder */}
+          <div className="bg-white shadow-md p-4 md:col-span-1">
+            <h2 className="text-lg font-semibold mb-4">Overview Indikator</h2>
+            <div className="h-64 flex items-center justify-center bg-gray-200 rounded-md">
+              <span className="text-teal-700">[Radar Chart Placeholder]</span>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
 export default Penilaian;
-
-
