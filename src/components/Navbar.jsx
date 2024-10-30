@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser'; // Ensure this path is correct
 import Login from './Login'; // Import the Login component
+import { useLocation } from 'react-router-dom';
 
 function Navbar() {
   const navigate = useNavigate();
-  const { user, logout } = useUser(); // Ensure useUser is imported correctly
+  const { user, login, logout } = useUser(); // Ensure useUser is imported correctly
+  const location = useLocation();
 
   const menu = [
     { name: 'Beranda', path: '/' },
@@ -14,13 +16,17 @@ function Navbar() {
   ];
 
   const [isLoginVisible, setLoginVisible] = useState(false);
-  const [isRegisterVisible, setRegisterVisible] = useState(false);
 
   const openLogin = () => {
     setLoginVisible(true);
   };
 
   const closeLogin = () => {
+    setLoginVisible(false);
+  };
+
+  const handleLogin = (userData) => {
+    login(userData);
     setLoginVisible(false);
   };
 
@@ -71,9 +77,8 @@ function Navbar() {
       {/* Login Form Overlay */}
       {isLoginVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-transparent p-8 rounded shadow-lg w-1/3">
-            <Login closeModal={closeLogin} />
-          
+          <div className="bg-white p-8 rounded shadow-lg w-1/3">
+            <Login closeModal={closeLogin} onLogin={handleLogin} />
           </div>
         </div>
       )}

@@ -1,25 +1,39 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+// src/App.js
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import Home from './pages/Home'; // Halaman beranda
-import EPSS from './pages/EPSS'; // Halaman EPSS Internal
-import Penilaian from './pages/Penilaian'; // Halaman Penilaian Mandiri
+import Home from './pages/Home';
+import EPSS from './pages/EPSS';
+import Penilaian from './pages/Penilaian';
+import Questionnaire from './pages/Questionnaire'; // Import the Questionnaire page
+import LoadingSpinner from './components/LoadingSpinner'; // Loading icon component
 
 function App() {
+  const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    // Show loading spinner on route change
+    setIsLoading(true);
+    const timer = setTimeout(() => setIsLoading(false), 500); // Adjust time as needed
+
+    return () => clearTimeout(timer); // Clean up on unmount
+  }, [location]);
+
   return (
-    <Router>
-      <div>
-        {/* Navbar akan selalu terlihat di bagian atas halaman */}
-        <Navbar />
-        
-        {/* Routes untuk konten halaman */}
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/EPSS" element={<EPSS />} />
-          <Route path="/Penilaian" element={<Penilaian />} />
-        </Routes>
-      </div>
-    </Router>
+    <div>
+      <Navbar />
+
+      {/* Display LoadingSpinner if loading */}
+      {isLoading && <LoadingSpinner />}
+
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/EPSS" element={<EPSS />} />
+        <Route path="/Penilaian" element={<Penilaian />} />
+        <Route path="/Questionnaire" element={<Questionnaire />} /> {/* Add Questionnaire route */}
+      </Routes>
+    </div>
   );
 }
 

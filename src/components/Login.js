@@ -26,7 +26,7 @@ const Login = ({ closeModal, openRegisterModal }) => {
 
     try {
       // Use Supabase's signIn method for authentication
-      const { user, error } = await supabase.auth.signIn({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -38,10 +38,10 @@ const Login = ({ closeModal, openRegisterModal }) => {
       }
 
       // Store the logged-in user in the context
-      setUser(user); // Save the user data in the context
+      setUser(data.user); // Save the user data in the context
       
       // Redirect to the dashboard after successful login
-      navigate('/Sidebar');
+      navigate('/penilaian');
       closeModal(); // Close the modal after successful login
     } catch (error) {
       console.error('Error during login:', error.message);

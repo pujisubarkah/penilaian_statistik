@@ -1,6 +1,14 @@
 import React from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
 function Penilaian() {
+  const navigate = useNavigate();
+
+  const goToQuestionnaire = () => {
+    navigate('/questionnaire'); // Navigates to the Questionnaire page
+  };
+
   return (
     <>
       {/* Header Section */}
@@ -53,10 +61,13 @@ function Penilaian() {
           </div>
         </div>
 
-        {/* Notification Banner for IPS */}
-        <div className="bg-gray-300 p-4 rounded-md text-black font-bold mt-4">
-          Nilai Indeks Pembangunan Statistik (IPS) Unit Kerja.
-        </div>
+       {/* Notification Banner for IPS */}
+      <div className="bg-gray-300 p-4 rounded-md text-black font-bold mt-4 flex justify-between items-center">
+        <span>Nilai Indeks Pembangunan Statistik (IPS) Unit Kerja</span>
+        <button onClick={goToQuestionnaire}  className="bg-teal-600 text-white px-10 py-2 rounded-md hover:bg-teal-500">
+          Isian
+        </button>
+      </div>
 
         {/* Two-Column Layout for Activities and Progress Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
