@@ -3,7 +3,7 @@ import React from 'react';
 const Footer = () => {
     return (
         <div className="mt-8">
-            <img src="https://placehold.co/100x100" alt="Logo LANRI" className="inline-block mr-4" />
+            <img src="/lanri.png" alt="Logo LANRI" className="inline-block mr-4" />
             <div className="inline-block align-top">
                 <h2 className="font-bold">Lembaga Administrasi Negara</h2>
                 <p>Pusat Data dan Sistem Informasi</p>
