@@ -20,6 +20,7 @@ function Questionnaire() {
   useEffect(() => {
     const fetchLevels = async () => {
       const { data: levelData, error: levelError } = await supabase
+        .schema('simbatik')
         .from('level') // Specify the schema here
         .select('id, level_nama, level_penjelasan');
 
@@ -38,6 +39,7 @@ function Questionnaire() {
     const fetchQuestion = async () => {
       const questionId = QUESTION_IDS[currentPage - 1]; // Get the question ID for the current page
       const { data: questionData, error: questionError } = await supabase
+        .schema('simbatik')
         .from('indikator')
         .select('id, indikator_deskripsi')
         .eq('id', questionId)
