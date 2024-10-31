@@ -20,7 +20,7 @@ function Questionnaire() {
   useEffect(() => {
     const fetchLevels = async () => {
       const { data: levelData, error: levelError } = await supabase
-        .from('simbatik.level_skor') // Specify the schema here
+        .from('level_skor') // Specify the schema here
         .select('id, level_nama, level_penjelasan');
 
       if (levelError) {
