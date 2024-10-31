@@ -87,6 +87,7 @@ function Penilaian() {
                           <th className="py-2 px-4 border-b">Domain</th>
                           <th className="py-2 px-4 border-b">Nilai Mandiri</th>
                           <th className="py-2 px-4 border-b">Nilai Walidata</th>
+                          <th className="py-2 px-4 border-b">Bobot</th>
                       </tr>
                   </thead>
                   <tbody>
@@ -94,21 +95,25 @@ function Penilaian() {
                           <td className="py-2 px-4 border-b">1. Prinsip Satu Data Indonesia</td>
                           <td className="py-2 px-4 border-b">-.-- / 5.00</td>
                           <td className="py-2 px-4 border-b">-.-- / 5.00</td>
+                          <td className="py-2 px-4 border-b">50%</td>
                       </tr>
                       <tr>
                           <td className="py-2 px-4 border-b">2. Kualitas Data</td>
                           <td className="py-2 px-4 border-b">-.-- / 5.00</td>
                           <td className="py-2 px-4 border-b">-.-- / 5.00</td>
+                          <td className="py-2 px-4 border-b">30%</td>
                       </tr>
                       <tr>
                           <td className="py-2 px-4 border-b">3. Proses Bisnis Statistik</td>
                           <td className="py-2 px-4 border-b">-.-- / 5.00</td>
                           <td className="py-2 px-4 border-b">-.-- / 5.00</td>
+                          <td className="py-2 px-4 border-b">15%</td>
                       </tr>
                       <tr>
                           <td className="py-2 px-4 border-b">4. Kelembagaan dan Statistik Nasional</td>
                           <td className="py-2 px-4 border-b">-.-- / 5.00</td>
                           <td className="py-2 px-4 border-b">-.-- / 5.00</td>
+                          <td className="py-2 px-4 border-b">5%</td>
                       </tr>
                   </tbody>
               </table>
