@@ -1,17 +1,62 @@
-import React from 'react';
-
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../supabaseClient';
 
 function Penilaian() {
   const navigate = useNavigate();
+  const [indikators, setIndikators] = useState({});
+  const [activeDomain, setActiveDomain] = useState(null);
+  const [totalIndicators, setTotalIndicators] = useState(0);
+  const [completedIndicators, setCompletedIndicators] = useState(0);
+
+  useEffect(() => {
+    const fetchIndikators = async () => {
+      const { data, error } = await supabase
+        .schema('simbatik')
+        .from('indikator')
+        .select('*');
+
+      if (error) {
+        console.error('Error fetching data:', error);
+      } else {
+        const groupedIndikators = data.reduce((acc, curr) => {
+          const domain = curr.domain_nama;
+          if (!acc[domain]) {
+            acc[domain] = {
+              id: curr.domain_id,
+              name: domain,
+              domain_bobot: curr.domain_bobot, // Ensure this field is in the data
+              indicators: [],
+            };
+          }
+          acc[domain].indicators.push({
+            id: curr.indikator_id,
+            name: curr.indikator_nama,
+            completed: curr.completed, // Assuming there's a completed field
+            indicator_bobot: curr.indicator_bobot, // Ensure this field is in the data
+          });
+          return acc;
+        }, {});
+
+        setIndikators(groupedIndikators);
+        setTotalIndicators(data.length);
+        setCompletedIndicators(data.filter(ind => ind.completed).length);
+      }
+    };
+
+    fetchIndikators();
+  }, []);
 
   const goToQuestionnaire = () => {
-    navigate('/questionnaire'); // Navigates to the Questionnaire page
+    navigate('/questionnaire');
+  };
+
+  const handleDomainClick = (domain) => {
+    setActiveDomain(activeDomain === domain ? null : domain);
   };
 
   return (
     <>
-      {/* Header Section */}
       <div
         className="relative bg-cover bg-center text-white p-6 mb-6"
         style={{ backgroundImage: 'url(https://lan.go.id/wp-content/uploads/2022/06/WhatsApp-Image-2022-06-24-at-13.43.42-1024x682.jpeg)' }}
@@ -25,103 +70,93 @@ function Penilaian() {
         </div>
       </div>
 
-      {/* Main Container */}
       <div className="container mx-auto p-6">
         <h1 className="text-2xl font-bold mb-4">PENILAIAN MANDIRI</h1>
         <p className="text-left text-md text-gray-700">Penilaian Mandiri Lembaga Administrasi Negara</p>
 
-        {/* Notification Banner */}
-        <div className="bg-teal-700 p-4 rounded-md text-white mt-4">
-          NAMA UNIT KERJA PRODUSEN DATA LAN
+        <div className={`p-4 rounded-md text-white mt-4 ${completedIndicators === totalIndicators ? 'bg-teal-600' : 'bg-teal-600'}`}>
+          {completedIndicators === totalIndicators ? 'Pengisian sudah selesai' : 'Pengisian belum selesai'}
         </div>
 
-        {/* Two-Column Layout for Activities and Progress Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          {/* Activities Column */}
           <div className="bg-white shadow-md p-4 md:col-span-2">
             <div className="space-y-4">
-              {/* Replace with activity details from database */}
-              <div>
-                <h2 className="text-lg font-semibold mb-4">Kegiatan Statistik yang dilakukan</h2>
-                <div className="mt-2">
-                    <div className="border-b py-2">
-                        <h3 className="font-medium">Kegiatan --</h3>
-                        <p>Nama Kegiatan Statistik</p>
-                        <p className="text-gray-500">Tahun | Unit Kerja | Tim Kerja/Poksi</p>
-                    </div>
+              <h2 className="text-lg font-semibold mb-4">Kegiatan Statistik yang dilakukan</h2>
+              <div className="mt-2">
+                <div className="border-b py-2">
+                  <h3 className="font-medium">Kegiatan --</h3>
+                  <p>Nama Kegiatan Statistik</p>
+                  <p className="text-gray-500">Tahun | Unit Kerja | Tim Kerja/Poksi</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Progress Overview Column */}
           <div className="bg-teal-700 text-white p-4 rounded-md shadow-md md:col-span-1">
-            <div className="text-4xl font-semibold">--</div>
+            <div className="text-4xl font-semibold">{completedIndicators}/{totalIndicators}</div>
             <div>Indikator sudah dilengkapi</div>
-
-            {/* Progress Bar */}
             <div className="my-2 w-full bg-gray-300 h-2 rounded">
-              <div className="bg-white h-full rounded" style={{ width: '75%' }}> </div>
+              <div
+                className="bg-white h-full rounded"
+                style={{ width: `${(completedIndicators / totalIndicators) * 100}%` }}
+              />
             </div>
-            <div className="text-sm">--% Completed</div>
+            <div className="text-sm">{Math.round((completedIndicators / totalIndicators) * 100)}% Completed</div>
           </div>
         </div>
 
-       {/* Notification Banner for IPS */}
-      <div className="bg-gray-300 p-4 rounded-md text-black font-bold mt-4 flex justify-between items-center">
-        <span>Nilai Indeks Pembangunan Statistik (IPS) Unit Kerja</span>
-        <button onClick={goToQuestionnaire}  className="bg-teal-700 text-white px-10 py-2 rounded-md hover:bg-teal-500">
-          Lihat Isian
-        </button>
-      </div>
+        <div className="bg-gray-300 p-4 rounded-md text-black font-bold mt-4 flex justify-between items-center">
+          <span>Nilai Indeks Pembangunan Statistik (IPS) Unit Kerja</span>
+          <button onClick={goToQuestionnaire} className="bg-teal-700 text-white px-10 py-2 rounded-md hover:bg-teal-500">
+            Lihat Isian
+          </button>
+        </div>
 
-        {/* Two-Column Layout for Activities and Progress Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          {/* Activities Column with Table Placeholder */}
           <div className="bg-white shadow-md p-4 md:col-span-2">
             <h2 className="text-lg font-semibold mb-4">Kegiatan Statistik</h2>
-            <div className="col-span-2">
-              <table className="min-w-full bg-white">
-                  <thead>
-                      <tr>
-                          <th className="py-2 px-4 border-b">Domain</th>
-                          <th className="py-2 px-4 border-b">Nilai Mandiri</th>
-                          <th className="py-2 px-4 border-b">Nilai Walidata</th>
-                          <th className="py-2 px-4 border-b">Bobot</th>
+            <table className="min-w-full bg-white">
+              <thead>
+                <tr>
+                  <th className="py-2 px-4 border-b">Domain</th>
+                  <th className="py-2 px-4 border-b">Bobot</th>
+                  <th className="py-2 px-4 border-b">Nilai Produsen Data</th>
+                  <th className="py-2 px-4 border-b">Nilai Wali Data</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.keys(indikators)
+                  .sort((a, b) => indikators[a].id - indikators[b].id)
+                  .map((domain, index) => (
+                    <React.Fragment key={index}>
+                      <tr onClick={() => handleDomainClick(domain)} className="cursor-pointer hover:bg-gray-100">
+                        <td className="py-2 px-4 border-b">{`${indikators[domain].id}. ${indikators[domain].name}`}</td>
+                        <td className="py-2 px-4 border-b">{indikators[domain].domain_bobot}</td>
+                        <td className="py-2 px-4 border-b"></td>
+                        <td className="py-2 px-4 border-b"></td>
                       </tr>
-                  </thead>
-                  <tbody>
-                      <tr>
-                          <td className="py-2 px-4 border-b">1. Prinsip Satu Data Indonesia</td>
-                          <td className="py-2 px-4 border-b">-.-- / 5.00</td>
-                          <td className="py-2 px-4 border-b">-.-- / 5.00</td>
-                          <td className="py-2 px-4 border-b">50%</td>
-                      </tr>
-                      <tr>
-                          <td className="py-2 px-4 border-b">2. Kualitas Data</td>
-                          <td className="py-2 px-4 border-b">-.-- / 5.00</td>
-                          <td className="py-2 px-4 border-b">-.-- / 5.00</td>
-                          <td className="py-2 px-4 border-b">30%</td>
-                      </tr>
-                      <tr>
-                          <td className="py-2 px-4 border-b">3. Proses Bisnis Statistik</td>
-                          <td className="py-2 px-4 border-b">-.-- / 5.00</td>
-                          <td className="py-2 px-4 border-b">-.-- / 5.00</td>
-                          <td className="py-2 px-4 border-b">15%</td>
-                      </tr>
-                      <tr>
-                          <td className="py-2 px-4 border-b">4. Kelembagaan dan Statistik Nasional</td>
-                          <td className="py-2 px-4 border-b">-.-- / 5.00</td>
-                          <td className="py-2 px-4 border-b">-.-- / 5.00</td>
-                          <td className="py-2 px-4 border-b">5%</td>
-                      </tr>
-                  </tbody>
-              </table>
-          </div>
-            
+                      {activeDomain === domain && (
+                        <tr>
+                          <td colSpan={4}>
+                            <ul>
+                              {indikators[domain].indicators
+                                .sort((a, b) => a.id - b.id)
+                                .map((ind, indIndex) => (
+                                  <li key={indIndex} className="py-2 px-4 border-b flex justify-between">
+                                    <span>{`${ind.id}. ${ind.name}`}</span>
+                                    <span>{ind.bobot}</span>
+                                  </li>
+                                ))}
+                            </ul>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  ))}
+              </tbody>
+            </table>
           </div>
 
-          {/* Progress Overview Column with Radar Chart Placeholder */}
           <div className="bg-white shadow-md p-4 md:col-span-1">
             <h2 className="text-lg font-semibold mb-4">Overview Indikator</h2>
             <div className="h-64 flex items-center justify-center bg-gray-200 rounded-md">
