@@ -41,7 +41,7 @@ function Questionnaire() {
       const { data: questionData, error: questionError } = await supabase
         .schema('simbatik')
         .from('indikator')
-        .select('id, indikator_deskripsi')
+        .select('*')
         .eq('id', questionId)
         .single(); // Fetch a single question by ID
 
@@ -79,39 +79,45 @@ function Questionnaire() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Penilaian Mandiri</h1>
+    <div className="p-6 max-w-4xl mx-auto rounded-lg">
+      <h1 className="text-xl font-bold mb-4">PENILAIAN MANDIRI</h1>
+      <p className="text-gray-600 mb-6">Penilaian Mandiri Unit Kerja Internal Lembaga Administrasi Negara</p>
 
-      {currentQuestion && (
-        <h2 className="text-xl font-semibold mb-6">{currentQuestion.indikator_deskripsi}</h2>
-      )}
-
-      <div className="flex gap-4 mb-6">
-        <button className="px-4 py-2 border border-teal-600 text-teal-600 bg-transparent rounded hover:bg-teal-600 hover:text-white">
-          Ringkasan
-        </button>
-        <button className="px-4 py-2 border border-white text-white bg-teal-600 rounded hover:bg-teal-500">
-          FINAL
-        </button>
+      <div className="flex items-center mb-6">
+        <button className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded mr-2">
+          <i className="fa fa-ellipsis-v text-white cursor-pointer"></i>    RINGKASAN</button>
+        <button className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded">FINAL</button>
       </div>
+
+      <div className="border-t border-gray-300 pt-4 mb-6">
+      {currentQuestion && (
+        <div><h2 className="text-lg font-semibold mb-2">Indikator {currentQuestion.indikator_id}</h2>
+        <p className="text-xl font-semibold mb-2">{currentQuestion.indikator_nama}</p>
+        <p className="text-gray-600 mb-4">{currentQuestion.indikator_deskripsi}</p>
+        </div>
+      )}
 
       {/* Teal Line Below Buttons */}
       <div className="border-b-2 border-teal-600 mb-6"></div>
 
+
       {/* Levels Section */}
-      <div className="space-y-4">
+      <div className="space-y-2">
         {levels.length > 0 && levels.map((level) => (
+          <div className="p-4 border rounded-lg">
           <div 
             key={level.id} 
             onClick={() => handleLevelClick(level.id)}
-            className={`p-4 border-2 border-blue-600 rounded cursor-pointer transition 
-              ${selectedLevel === level.id ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'} 
-              hover:bg-blue-500 hover:text-white`}
+            className={`p-4 border rounded-lg cursor-pointer transition 
+              ${selectedLevel === level.id ? 'bg-teal-600 text-white' : 'bg-white'} 
+              hover:bg-teal-600 hover:text-white`}
           >
-            <strong>{level.level_nama}</strong>
-            <p>{level.level_penjelasan}</p>
+            <h3 className="font-semibold">{level.level_nama}</h3>
+            <p className="">{level.level_penjelasan}</p>
+          </div>
           </div>
         ))}
+      </div>
       </div>
 
       {/* Explanation Section */}
@@ -122,7 +128,7 @@ function Questionnaire() {
           onChange={handleContentChange}
           theme="snow"
           placeholder="Tuliskan penjelasan Anda..."
-          className="mb-4"
+          className="mb-4 h-64"
           modules={{
             toolbar: [
               [{ 'header': '1' }, { 'header': '2' }, { 'font': [] }],
