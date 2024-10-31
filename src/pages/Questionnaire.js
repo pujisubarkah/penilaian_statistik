@@ -83,41 +83,62 @@ function Questionnaire() {
       <h1 className="text-xl font-bold mb-4">PENILAIAN MANDIRI</h1>
       <p className="text-gray-600 mb-6">Penilaian Mandiri Unit Kerja Internal Lembaga Administrasi Negara</p>
 
-      <div className="flex items-center mb-6">
-        <button className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded mr-2">
-          <i className="fa fa-ellipsis-v text-white cursor-pointer"></i>    RINGKASAN</button>
-        <button className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded">FINAL</button>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <button className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded mr-2">
+            <i className="fa fa-ellipsis-v text-white cursor-pointer"></i> RINGKASAN
+          </button>
+          <button className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded">FINAL</button>
+        </div>
+
+        {/* Pagination Controls */}
+        <div className="flex">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => handlePageChange(currentPage - 1)}
+            className={`px-4 py-2 bg-teal-600 text-white rounded ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <i className="fa fa-chevron-left"></i> {/* Left Arrow Icon */}
+          </button>
+          <button
+            disabled={currentPage === TOTAL_PAGES}
+            onClick={() => handlePageChange(currentPage + 1)}
+            className={`px-4 py-2 bg-teal-600 text-white rounded ${currentPage === TOTAL_PAGES ? 'opacity-50 cursor-not-allowed' : ''} ml-2`}
+          >
+            <i className="fa fa-chevron-right"></i> {/* Right Arrow Icon */}
+          </button>
+        </div>
       </div>
 
       <div className="border-t border-gray-300 pt-4 mb-6">
-      {currentQuestion && (
-        <div><h2 className="text-lg font-semibold mb-2">Indikator {currentQuestion.indikator_id}</h2>
-        <p className="text-xl font-semibold mb-2">{currentQuestion.indikator_nama}</p>
-        <p className="text-gray-600 mb-4">{currentQuestion.indikator_deskripsi}</p>
+        {currentQuestion && (
+          <div>
+            <h2 className="text-lg font-semibold mb-2">Indikator {currentQuestion.indikator_id}</h2>
+            <p className="text-xl font-semibold mb-2">{currentQuestion.indikator_nama}</p>
+            <p className="text-gray-600 mb-4">{currentQuestion.indikator_deskripsi}</p>
+          </div>
+        )}
+
+        {/* Teal Line Below Buttons */}
+        <div className="border-b-2 border-teal-600 mb-6"></div>
+
+        {/* Levels Section */}
+        <div className="space-y-2">
+          {levels.length > 0 && levels.map((level) => (
+            <div className="p-4 border rounded-lg">
+              <div
+                key={level.id}
+                onClick={() => handleLevelClick(level.id)}
+                className={`p-4 border rounded-lg cursor-pointer transition 
+                  ${selectedLevel === level.id ? 'bg-teal-600 text-white' : 'bg-white'} 
+                  hover:bg-teal-600 hover:text-white`}
+              >
+                <h3 className="font-semibold">{level.level_nama}</h3>
+                <p className="">{level.level_penjelasan}</p>
+              </div>
+            </div>
+          ))}
         </div>
-      )}
-
-      {/* Teal Line Below Buttons */}
-      <div className="border-b-2 border-teal-600 mb-6"></div>
-
-
-      {/* Levels Section */}
-      <div className="space-y-2">
-        {levels.length > 0 && levels.map((level) => (
-          <div className="p-4 border rounded-lg">
-          <div 
-            key={level.id} 
-            onClick={() => handleLevelClick(level.id)}
-            className={`p-4 border rounded-lg cursor-pointer transition 
-              ${selectedLevel === level.id ? 'bg-teal-600 text-white' : 'bg-white'} 
-              hover:bg-teal-600 hover:text-white`}
-          >
-            <h3 className="font-semibold">{level.level_nama}</h3>
-            <p className="">{level.level_penjelasan}</p>
-          </div>
-          </div>
-        ))}
-      </div>
       </div>
 
       {/* Explanation Section */}
@@ -154,24 +175,6 @@ function Questionnaire() {
       file:bg-teal-600 file:text-white
       hover:file:bg-teal-500" 
         />
-      </div>
-
-      {/* Pagination Controls */}
-      <div className="flex justify-end mt-4">
-        <button
-          disabled={currentPage === 1}
-          onClick={() => handlePageChange(currentPage - 1)}
-          className={`px-4 py-2 bg-teal-600 text-white rounded ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
-        >
-          <i className="fa fa-chevron-left"></i> {/* Left Arrow Icon */}
-        </button>
-        <button
-          disabled={currentPage === TOTAL_PAGES}
-          onClick={() => handlePageChange(currentPage + 1)}
-          className={`px-4 py-2 bg-teal-600 text-white rounded ${currentPage === TOTAL_PAGES ? 'opacity-50 cursor-not-allowed' : ''} ml-2`}
-        >
-          <i className="fa fa-chevron-right"></i> {/* Right Arrow Icon */}
-        </button>
       </div>
     </div>
   );
