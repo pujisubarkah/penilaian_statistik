@@ -32,7 +32,7 @@ function Penilaian() {
 
         {/* Notification Banner */}
         <div className="bg-teal-700 p-4 rounded-md text-white mt-4">
-          Penilaian Mandiri EPSS 2024 sudah berakhir. Terima kasih atas kerjasama dan partisipasi aktif Bapak/Ibu.
+          NAMA UNIT KERJA PRODUSEN DATA LAN
         </div>
 
         {/* Two-Column Layout for Activities and Progress Overview */}
@@ -42,30 +42,36 @@ function Penilaian() {
             <div className="space-y-4">
               {/* Replace with activity details from database */}
               <div>
-                <p className="m-0 text-gray-800 text-lg font-normal">Kegiatan Statistik yang dilakukan</p>
-                <span className="text-blue-600 text-xs">Tahun dan Instansi</span>
+                <h2 className="text-lg font-semibold mb-4">Kegiatan Statistik yang dilakukan</h2>
+                <div className="mt-2">
+                    <div className="border-b py-2">
+                        <h3 className="font-medium">Kegiatan --</h3>
+                        <p>Nama Kegiatan Statistik</p>
+                        <p className="text-gray-500">Tahun | Unit Kerja | Tim Kerja/Poksi</p>
+                    </div>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Progress Overview Column */}
           <div className="bg-teal-700 text-white p-4 rounded-md shadow-md md:col-span-1">
-            <div className="text-4xl font-semibold">38</div>
-            <div>Indikator sudah lengkap diperiksa</div>
+            <div className="text-4xl font-semibold">--</div>
+            <div>Indikator sudah dilengkapi</div>
 
             {/* Progress Bar */}
             <div className="my-2 w-full bg-gray-300 h-2 rounded">
-              <div className="bg-white h-full rounded" style={{ width: '75%' }}></div>
+              <div className="bg-white h-full rounded" style={{ width: '75%' }}> </div>
             </div>
-            <div className="text-sm">75% Completed</div>
+            <div className="text-sm">--% Completed</div>
           </div>
         </div>
 
        {/* Notification Banner for IPS */}
       <div className="bg-gray-300 p-4 rounded-md text-black font-bold mt-4 flex justify-between items-center">
         <span>Nilai Indeks Pembangunan Statistik (IPS) Unit Kerja</span>
-        <button onClick={goToQuestionnaire}  className="bg-teal-600 text-white px-10 py-2 rounded-md hover:bg-teal-500">
-          Isian
+        <button onClick={goToQuestionnaire}  className="bg-teal-700 text-white px-10 py-2 rounded-md hover:bg-teal-500">
+          Lihat Isian
         </button>
       </div>
 
@@ -74,7 +80,39 @@ function Penilaian() {
           {/* Activities Column with Table Placeholder */}
           <div className="bg-white shadow-md p-4 md:col-span-2">
             <h2 className="text-lg font-semibold mb-4">Kegiatan Statistik</h2>
-         
+            <div className="col-span-2">
+              <table className="min-w-full bg-white">
+                  <thead>
+                      <tr>
+                          <th className="py-2 px-4 border-b">Domain</th>
+                          <th className="py-2 px-4 border-b">Nilai Mandiri</th>
+                          <th className="py-2 px-4 border-b">Nilai Walidata</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      <tr>
+                          <td className="py-2 px-4 border-b">1. Prinsip Satu Data Indonesia</td>
+                          <td className="py-2 px-4 border-b">-.-- / 5.00</td>
+                          <td className="py-2 px-4 border-b">-.-- / 5.00</td>
+                      </tr>
+                      <tr>
+                          <td className="py-2 px-4 border-b">2. Kualitas Data</td>
+                          <td className="py-2 px-4 border-b">-.-- / 5.00</td>
+                          <td className="py-2 px-4 border-b">-.-- / 5.00</td>
+                      </tr>
+                      <tr>
+                          <td className="py-2 px-4 border-b">3. Proses Bisnis Statistik</td>
+                          <td className="py-2 px-4 border-b">-.-- / 5.00</td>
+                          <td className="py-2 px-4 border-b">-.-- / 5.00</td>
+                      </tr>
+                      <tr>
+                          <td className="py-2 px-4 border-b">4. Kelembagaan dan Statistik Nasional</td>
+                          <td className="py-2 px-4 border-b">-.-- / 5.00</td>
+                          <td className="py-2 px-4 border-b">-.-- / 5.00</td>
+                      </tr>
+                  </tbody>
+              </table>
+          </div>
             
           </div>
 
