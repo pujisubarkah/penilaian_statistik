@@ -175,6 +175,46 @@ function Questionnaire() {
     setContent('');
   };
 
+  // Tambahkan di dalam fungsi Questionnaire, di bawah handleSave
+const handleFinalSave = async () => {
+  // Periksa apakah level sudah dipilih dan ada konten yang diisi
+  if (!selectedLevel || !content.trim()) {
+    alert('Silakan pilih level dan isi penjelasan sebelum menyimpan.');
+    return;
+  }
+
+  try {
+    // Insert data ke tabel 'penilaian' di Supabase
+    const { error } = await supabase
+      .schema('simbatik')
+      .from('penilaian') // Sesuaikan nama tabel jika berbeda
+      .insert([
+        {
+          user_id: (await supabase.auth.getUser()).data.user.id, // Menggunakan user_id dari pengguna yang login
+        
+          level_id: selectedLevel, // Menyimpan level yang dipilih
+          
+          question_id: QUESTION_IDS[currentPage - 1], // Menyimpan ID pertanyaan berdasarkan halaman saat ini
+          penjelasan: content // Menyimpan konten dari ReactQuill ke field penjelasan
+        }
+      ]);
+
+    if (error) {
+      console.error('Error saving final data:', error);
+      alert('Terjadi kesalahan saat menyimpan data final.');
+    } else {
+      alert('Data final berhasil disimpan!');
+      setSelectedLevel(null); // Reset level yang dipilih
+      setContent(''); // Reset konten
+      setCurrentPage(1); // Kembali ke halaman pertama atau sesuaikan sesuai kebutuhan
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Terjadi kesalahan saat menyimpan data final.');
+  }
+};
+
+
   return (
     <div className="p-6 max-w-4xl mx-auto rounded-lg">
       <h1 className="text-xl font-bold mb-4">PENILAIAN MANDIRI</h1>
@@ -185,7 +225,12 @@ function Questionnaire() {
           <button className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded mr-2">
             <i className="fa fa-ellipsis-v text-white cursor-pointer"></i> RINGKASAN
           </button>
-          <button className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded">FINAL</button>
+          <button
+  onClick={handleFinalSave} // Tambahkan handler ini
+  className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded"
+>
+  FINAL
+</button>
         </div>
 
         {/* Pagination Controls */}

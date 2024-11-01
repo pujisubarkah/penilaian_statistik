@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import Login from './Login'; // Import the Login component
 import { supabase } from '../supabaseClient'; // Make sure you import Supabase client
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser } from '@fortawesome/free-solid-svg-icons';
 
 
 function Navbar() {
