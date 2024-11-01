@@ -8,6 +8,7 @@ function Navbar() {
   const navigate = useNavigate();
   const { user, login, logout } = useUser(); // Ensure useUser is imported correctly
   const location = useLocation();
+  const [user, setUser] = useState(null); // State to store user information
 
   const menu = [
     { name: 'Beranda', path: '/' },
@@ -30,10 +31,38 @@ function Navbar() {
     setLoginVisible(false);
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+    // Effect to check user status and fetch cart item count
+    useEffect(() => {
+        const getSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            const currentUser = session?.user || null;
+
+            // Check if currentUser exists before making any queries
+            if (currentUser) {
+                const { data: profileData, error: profileError } = await supabase
+                    .schema('simbatik')
+                    .from('unit_kerja')
+                    .eq('user_id', currentUser.id)
+                    .single();
+
+                if (profileError) {
+                    console.error('Error fetching user profile:', profileError.message);
+                }
+                setUser(currentUser);
+            }
+        }
+    }
+  
+  // Function for Logout
+    const handleLogout = async () => {
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+            console.error('Error during logout:', error.message);
+        } else {
+            setUser(null); // Reset user state to null after logout
+            setCartItemCount(0); // Optionally reset cart item count
+        }
+    };
 
   return (
     <nav className="flex justify-between items-center p-4 bg-teal-700 shadow-md">
@@ -59,19 +88,28 @@ function Navbar() {
         ))}
       </ul>
 
+      {/* Login/Logout Section */}
       <div className="flex items-center gap-4">
-        {user ? (
-          <span onClick={handleLogout} className="text-white text-lg cursor-pointer">
-            Selamat Datang, {user.email || user.username}! (Logout)
-          </span>
-        ) : (
-          <button
-            onClick={openLogin}
-            className="border-2 border-white bg-teal-700 text-white py-2 px-4 rounded-lg cursor-pointer text-lg hover:bg-white hover:text-teal-700 transition"
+                            {user ? (
+                                <span onClick={handleLogout} className="text-white text-lg cursor-pointer">
+                                  Selamat Datang, {user.email || user.username}!
+                                </span>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="border-2 border-white bg-teal-700 text-white py-2 px-4 rounded-lg cursor-pointer text-lg hover:bg-white hover:text-teal-700 transition"
           >
-            Masuk
-          </button>
-        )}
+                                        Logout
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={openModal}
+                                    className="border-2 border-white bg-teal-700 text-white py-2 px-4 rounded-lg cursor-pointer text-lg hover:bg-white hover:text-teal-700 transition"
+          >
+                                    <i className="fas fa-user mr-2"></i>
+                                    Login
+                                </button>
+                            )}
       </div>
 
       {/* Login Form Overlay */}
