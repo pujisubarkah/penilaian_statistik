@@ -1,17 +1,21 @@
-// src/index.js or src/App.js
-
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
-import App from './App'; // Adjust the path as necessary
-import { UserProvider } from './context/UserContext'; // Adjust the path as necessary
-import './index.css'; // Ensure this path is correct
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+import reportWebVitals from './reportWebVitals';
+import { Provider } from 'react-redux';
+import store from './store';
+import { BrowserRouter } from 'react-router-dom'; // Import BrowserRouter
 
-ReactDOM.render(
-  <Router>
-    <UserProvider>
-      <App />
-    </UserProvider>
-  </Router>,
-  document.getElementById('root')
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <Provider store={store}>
+      <BrowserRouter> {/* Wrap App with BrowserRouter */}
+        <App />
+      </BrowserRouter>
+    </Provider>
+  </React.StrictMode>
 );
+
+reportWebVitals();
