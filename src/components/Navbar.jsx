@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import Login from './Login'; // Import the Login component
 import { supabase } from '../supabaseClient'; // Make sure you import Supabase client
 
+
 function Navbar() {
   const [isModalOpen, setModalOpen] = useState(false); // State for modal
   const [user, setUser] = useState(null); // State to store user information
@@ -51,9 +52,24 @@ function Navbar() {
     }
 
     getSession(); // Call getSession when the component mounts
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN') {
+        setUser(session.user);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
+    });
+
+    // Cleanup the listener on component unmount
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   return (
+    <React.Fragment>
     <nav className="flex justify-between items-center p-4 bg-teal-700 shadow-md">
       <div className="flex items-center">
         <img src="/lanri.png" alt="Logo" className="h-12 mr-3 p-2" />
@@ -81,7 +97,7 @@ function Navbar() {
       <div className="flex items-center gap-4">
         {user ? (
           <div>
-            <span onClick={handleLogout} className="text-white text-lg cursor-pointer">
+            <span className="text-white text-lg">
               Selamat Datang, {user.email || user.username}!
             </span>
             <button
@@ -106,11 +122,15 @@ function Navbar() {
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded shadow-lg w-1/3">
-            <Login isOpen={isModalOpen} onClose={closeModal} />
+            <Login isOpen={isModalOpen} onClose={closeModal} onLoginSuccess={(loggedInUser) => {
+              setUser(loggedInUser);
+              closeModal();
+            }} />
           </div>
         </div>
       )}
     </nav>
+    </React.Fragment>
   );
 }
 
