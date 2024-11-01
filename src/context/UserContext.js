@@ -1,23 +1,52 @@
-// src/context/UserContext.js
+import React, { createContext, useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient'; // Assuming you're using Supabase for authentication
 
-import React, { createContext, useContext, useState } from 'react';
+export const AuthContext = createContext();
 
-const UserContext = createContext();
+export const AuthProvider = ({ children }) => {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+    useEffect(() => {
+        // Fetch the session from Supabase
+        const fetchSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            setUser(session?.user || null);
+            setLoading(false);
+        };
 
-  return (
-    <UserContext.Provider value={{ user, setUser }}>
-      {children}
-    </UserContext.Provider>
-  );
-};
+        fetchSession();
 
-export const useUser = () => {
-  const context = useContext(UserContext);
-  if (!context) {
-    throw new Error("useUser must be used within a UserProvider");
-  }
-  return context;
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+            setUser(session?.user || null);
+            setLoading(false);
+        });
+
+        return () => {
+            subscription?.unsubscribe();
+        };
+    }, []);
+
+    const signUp = async (email, password) => {
+        const { user, error } = await supabase.auth.signUp({ email, password });
+        if (error) throw error;
+        return user;
+    };
+
+    const logIn = async (email, password) => {
+        const { user, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        return user;
+    };
+
+    const logOut = async () => {
+        await supabase.auth.signOut();
+        setUser(null);
+    };
+
+    return (
+        <AuthContext.Provider value={{ user, loading, signUp, logIn, logOut }}>
+            {children}
+        </AuthContext.Provider>
+    );
 };
