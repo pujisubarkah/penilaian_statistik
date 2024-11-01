@@ -3,10 +3,11 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { supabase } from '../supabaseClient';
 import 'font-awesome/css/font-awesome.min.css'; // Import Font Awesome styles if using npm
+import { gapi } from 'gapi-script'; // Import gapi for Google API
 
-const TOTAL_PAGES = 15; // Total number of questionnaire pages
+const TOTAL_PAGES = 16; // Total number of questionnaire pages
 const QUESTION_IDS = [
-  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, // Example question IDs
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, // Example question IDs
 ];
 
 function Questionnaire() {
@@ -15,19 +16,49 @@ function Questionnaire() {
   const [levels, setLevels] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [unitKerja, setUnitKerja] = useState(null); // State to hold unit kerja name
+
+  // Fetch unit kerja for logged-in user
+  useEffect(() => {
+    const fetchUnitKerja = async () => {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error('Error fetching user:', userError);
+        return;
+      }
+
+      const userId = user ? user.id : null;
+      if (userId) {
+        const { data, error } = await supabase
+          .schema('simbatik')
+          .from('unit_kerja')
+          .select('unit_kerja') // Adjust based on actual field name
+          .eq('user_id', userId)
+          .single();
+
+        if (error) {
+          console.error('Error fetching unit kerja:', error);
+        } else {
+          setUnitKerja(data?.unit_kerja || ''); // Set unit kerja state
+        }
+      }
+    };
+
+    fetchUnitKerja();
+  }, []);
 
   // Fetch levels from Supabase
   useEffect(() => {
     const fetchLevels = async () => {
       const { data: levelData, error: levelError } = await supabase
         .schema('simbatik')
-        .from('level') // Specify the schema here
+        .from('level')
         .select('id, level_nama, level_penjelasan');
 
       if (levelError) {
         console.error('Error fetching levels:', levelError);
       } else {
-        setLevels(levelData || []); // Set state to fetched levels
+        setLevels(levelData || []);
       }
     };
 
@@ -37,18 +68,18 @@ function Questionnaire() {
   // Fetch current question based on currentPage
   useEffect(() => {
     const fetchQuestion = async () => {
-      const questionId = QUESTION_IDS[currentPage - 1]; // Get the question ID for the current page
+      const questionId = QUESTION_IDS[currentPage - 1];
       const { data: questionData, error: questionError } = await supabase
         .schema('simbatik')
         .from('indikator')
         .select('*')
         .eq('id', questionId)
-        .single(); // Fetch a single question by ID
+        .single();
 
       if (questionError) {
         console.error('Error fetching question:', questionError);
       } else {
-        setCurrentQuestion(questionData || null); // Set the current question state
+        setCurrentQuestion(questionData || null);
       }
     };
 
@@ -63,25 +94,91 @@ function Questionnaire() {
     setContent(value);
   };
 
-  const handleFileChange = (event) => {
-    const file = event.target.files[0]; // Get the selected file
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
 
     if (file) {
-      console.log('Selected file:', file);
-      // Implement your file upload logic here
+      await uploadFileToGoogleDrive(file);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!selectedLevel || !content.trim()) {
+      alert('Silakan pilih level dan isi penjelasan.');
+      return;
+    }
+
+    const { error } = await supabase
+      .schema('simbatik')
+      .from('nilai_indikator') // Adjust table name as necessary
+      .insert([{ level_id: selectedLevel, content }]);
+
+    if (error) {
+      console.error('Error saving data:', error);
+      alert('Error saving data.');
+    } else {
+      alert('Data saved successfully!');
+      setSelectedLevel(null);
+      setContent('');
+    }
+  };
+
+  const uploadFileToGoogleDrive = async (file) => {
+    const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID; // Use environment variables
+    const SCOPES = process.env.REACT_APP_GOOGLE_CLIENT_SECRET;
+
+    // Load the Google API
+    await new Promise((resolve) => {
+      gapi.load('client:auth2', async () => {
+        await gapi.auth2.init({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+        });
+        resolve();
+      });
+    });
+
+    await gapi.auth2.getAuthInstance().signIn();
+
+    const accessToken = gapi.auth.getToken().access_token;
+
+    const metadata = {
+      name: file.name,
+      mimeType: file.type,
+    };
+
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', file);
+
+    try {
+      const response = await fetch(
+        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
+        {
+          method: 'POST',
+          headers: new Headers({ Authorization: 'Bearer ' + accessToken }),
+          body: form,
+        }
+      );
+      const result = await response.json();
+      console.log('File uploaded successfully:', result);
+      alert('File uploaded successfully to Google Drive!');
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      alert('Error uploading file to Google Drive.');
     }
   };
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    setSelectedLevel(null); // Reset selected level on page change
-    setContent(''); // Reset content on page change
+    setSelectedLevel(null);
+    setContent('');
   };
 
   return (
     <div className="p-6 max-w-4xl mx-auto rounded-lg">
       <h1 className="text-xl font-bold mb-4">PENILAIAN MANDIRI</h1>
-      <p className="text-gray-600 mb-6">Penilaian Mandiri Unit Kerja Internal Lembaga Administrasi Negara</p>
+      <p className="text-gray-600 mb-6">Penilaian Mandiri {unitKerja ? `Unit Kerja ${unitKerja}` : 'Loading...'}</p>
 
       <div className="flex justify-between items-center mb-6">
         <div>
@@ -98,14 +195,14 @@ function Questionnaire() {
             onClick={() => handlePageChange(currentPage - 1)}
             className={`px-4 py-2 bg-teal-600 text-white rounded ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            <i className="fa fa-chevron-left"></i> {/* Left Arrow Icon */}
+            <i className="fa fa-chevron-left"></i>
           </button>
           <button
             disabled={currentPage === TOTAL_PAGES}
             onClick={() => handlePageChange(currentPage + 1)}
             className={`px-4 py-2 bg-teal-600 text-white rounded ${currentPage === TOTAL_PAGES ? 'opacity-50 cursor-not-allowed' : ''} ml-2`}
           >
-            <i className="fa fa-chevron-right"></i> {/* Right Arrow Icon */}
+            <i className="fa fa-chevron-right"></i>
           </button>
         </div>
       </div>
@@ -119,65 +216,40 @@ function Questionnaire() {
           </div>
         )}
 
-        {/* Teal Line Below Buttons */}
         <div className="border-b-2 border-teal-600 mb-6"></div>
 
         {/* Levels Section */}
         <div className="space-y-2">
           {levels.length > 0 && levels.map((level) => (
-            <div className="p-4 border rounded-lg">
+            <div className="p-4 border rounded-lg" key={level.id}>
               <div
-                key={level.id}
                 onClick={() => handleLevelClick(level.id)}
                 className={`p-4 border rounded-lg cursor-pointer transition 
                   ${selectedLevel === level.id ? 'bg-teal-600 text-white' : 'bg-white'} 
                   hover:bg-teal-600 hover:text-white`}
               >
                 <h3 className="font-semibold">{level.level_nama}</h3>
-                <p className="">{level.level_penjelasan}</p>
+                <p className="text-gray-600">{level.level_penjelasan}</p>
               </div>
             </div>
           ))}
         </div>
-      </div>
 
-      {/* Explanation Section */}
-      <div className="p-2 max-w-4xl mx-auto">
-        <h3 className="text-lg font-medium mb-2">Penjelasan</h3>
-        <ReactQuill
-          value={content}
-          onChange={handleContentChange}
-          theme="snow"
-          placeholder="Tuliskan penjelasan Anda..."
-          className="mb-4 h-64"
-          modules={{
-            toolbar: [
-              [{ 'header': '1' }, { 'header': '2' }, { 'font': [] }],
-              [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-              ['bold', 'italic', 'underline', 'strike'],
-              [{ 'align': [] }],
-              ['clean']
-            ]
-          }}
-        />
-      </div>
+        {/* ReactQuill Editor for Comments */}
+        <div className="mt-4">
+          <ReactQuill value={content} onChange={handleContentChange} />
+        </div>
 
-      {/* File Upload Section */}
-      <div className="p-2 max-w-4xl mx-auto mt-6">
-        <h3 className="text-lg font-medium mb-2">Bukti Dukung</h3>
-        <input 
-          type="file" 
-          onChange={handleFileChange} 
-          className="block w-full text-sm text-gray-500
-      file:mr-4 file:py-2 file:px-4
-      file:rounded file:border-0
-      file:text-sm file:font-semibold
-      file:bg-teal-600 file:text-white
-      hover:file:bg-teal-500" 
-        />
+        {/* File Upload */}
+        <input type="file" onChange={handleFileChange} className="mt-4" />
+
+        {/* Save Button */}
+        <button onClick={handleSave} className="mt-4 bg-teal-600 text-white px-4 py-2 rounded">
+          Save
+        </button>
       </div>
     </div>
   );
 }
 
-export default Questionnaire;
+export default Questionnaire; 
