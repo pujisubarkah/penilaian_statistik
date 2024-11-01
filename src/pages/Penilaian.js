@@ -8,6 +8,7 @@ function Penilaian() {
   const [activeDomain, setActiveDomain] = useState(null);
   const [totalIndicators, setTotalIndicators] = useState(0);
   const [completedIndicators, setCompletedIndicators] = useState(0);
+  const [ipsValue, setIpsValue] = useState(null); // State for IPS value
 
   useEffect(() => {
     const fetchIndikators = async () => {
@@ -44,7 +45,36 @@ function Penilaian() {
       }
     };
 
+    const fetchIpsValue = async () => {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+      if (userError) {
+        console.error('Error fetching user:', userError);
+        return;
+      }
+    
+      const userId = user ? user.id : null; // Get the current user's ID if logged in
+    
+      if (userId) {
+        const { data, error } = await supabase
+          .schema('simbatik')
+          .from('unit_kerja')
+          .select('unit_kerja') // Fetch the specific field
+          .eq('user_id', userId)
+          .single();
+    
+        if (error) {
+          console.error('Error fetching unit kerja:', error);
+        } else {
+          setIpsValue(data?.unit_kerja); // Store the value of unit_kerja
+        }
+      } else {
+        console.warn('No user is logged in');
+      }
+    };
+
     fetchIndikators();
+    fetchIpsValue();
   }, []);
 
   const goToQuestionnaire = () => {
@@ -54,7 +84,6 @@ function Penilaian() {
   const handleDomainClick = (domain) => {
     setActiveDomain(activeDomain === domain ? null : domain);
   };
-
   return (
     <>
       <div
@@ -105,8 +134,9 @@ function Penilaian() {
           </div>
         </div>
 
+        {/* IPS Section */}
         <div className="bg-gray-300 p-4 rounded-md text-black font-bold mt-4 flex justify-between items-center">
-          <span>Nilai Indeks Pembangunan Statistik (IPS) Unit Kerja</span>
+          <span>Nilai Indeks Pembangunan Statistik (IPS) Unit Kerja: {ipsValue !== null ? ipsValue : 'Loading...'}</span>
           <button onClick={goToQuestionnaire} className="bg-teal-700 text-white px-10 py-2 rounded-md hover:bg-teal-500">
             Lihat Isian
           </button>
@@ -144,7 +174,7 @@ function Penilaian() {
                                 .map((ind, indIndex) => (
                                   <li key={indIndex} className="py-2 px-4 border-b flex justify-between">
                                     <span>{`${ind.id}. ${ind.name}`}</span>
-                                    <span>{ind.bobot}</span>
+                                    <span>{ind.indicator_bobot}</span> {/* Adjust field name as necessary */}
                                   </li>
                                 ))}
                             </ul>
@@ -160,7 +190,7 @@ function Penilaian() {
           <div className="bg-white shadow-md p-4 md:col-span-1">
             <h2 className="text-lg font-semibold mb-4">Overview Indikator</h2>
             <div className="h-64 flex items-center justify-center bg-gray-200 rounded-md">
-              <span className="text-teal-700">[Radar Chart Placeholder]</span>
+              <span className="text-center">Chart/Graph Here</span>
             </div>
           </div>
         </div>
