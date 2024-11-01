@@ -23,16 +23,17 @@ const Login = ({ isOpen, onClose }) => {
       setError('Invalid email or password');
     } else {
       console.log('Logged in successfully:', data);
+      navigate('/Penilaian', { replace: true }); // Redirect to /Penilaian without adding to history
       onClose(); // Tutup modal setelah login berhasil
       }
     };
 
-  const handleSubmit = (e) => {
-    e.preventDefault(); // Cegah form agar tidak refresh halaman
-    signInWithEmail();  // Panggil fungsi sign-in
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent form submission
+    await signInWithEmail();  // Panggil fungsi sign-in
   };
 
-  if (!isOpen) return null; // Jika modal tidak terbuka, kembalikan null
+    if (!isOpen) return null; // Jika modal tidak terbuka, kembalikan null
 
   return (
     <div className="relative max-w-sm mx-auto p-4 bg-white shadow-lg rounded-lg flex flex-col">
