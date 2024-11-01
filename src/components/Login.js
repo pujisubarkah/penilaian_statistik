@@ -1,68 +1,42 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient'; // Make sure you import Supabase client
-import { useUser } from '../context/UserContext'; // Import useUser from context
 
-const Login = ({ closeModal, openRegisterModal }) => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+const Login = ({ isOpen, onClose }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null); // Untuk menangani kesalahan login
+  const navigate = useNavigate(); // Gunakan useNavigate untuk redirecting
 
-  const { setUser } = useUser(); // Access setUser from the context
-  const navigate = useNavigate();
+  const signInWithEmail = async () => {
+    // Reset error sebelum mencoba login
+    setError(null);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
+    // Attempt login with email and password
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const { email, password } = formData;
-
-    try {
-      // Use Supabase's signIn method for authentication
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        console.error('Login failed:', error.message);
-        alert('Login gagal. Email atau password salah.');
-        return; // Exit the function if there is an error
+    if (error) {
+      console.error('Error logging in with email and password:', error.message);
+      setError('Invalid email or password');
+    } else {
+      console.log('Logged in successfully:', data);
+      onClose(); // Tutup modal setelah login berhasil
       }
+    };
 
-      // Store the logged-in user in the context
-      setUser(data.user); // Save the user data in the context
-      
-      // Redirect to the dashboard after successful login
-      navigate('/penilaian');
-      closeModal(); // Close the modal after successful login
-    } catch (error) {
-      console.error('Error during login:', error.message);
-      alert('Terjadi kesalahan saat login.');
-    }
+  const handleSubmit = (e) => {
+    e.preventDefault(); // Cegah form agar tidak refresh halaman
+    signInWithEmail();  // Panggil fungsi sign-in
   };
 
-  const handleContactAdmin = () => {
-    const { email } = formData;
-
-    if (!email) {
-      alert('Silakan masukkan email Anda terlebih dahulu.');
-      return;
-    }
-
-    alert(`Silakan hubungi admin untuk reset password`);
-  };
+  if (!isOpen) return null; // Jika modal tidak terbuka, kembalikan null
 
   return (
     <div className="relative max-w-sm mx-auto p-4 bg-white shadow-lg rounded-lg flex flex-col">
-      <button onClick={closeModal} className="absolute top-[0px] right-[20px] text-5xl text-gray-700 hover:text-gray-900">
+      <button onClick={onClose} className="absolute top-[0px] right-[20px] text-5xl text-gray-700 hover:text-gray-900">
         &times;
       </button>
 
@@ -77,8 +51,8 @@ const Login = ({ closeModal, openRegisterModal }) => {
               <input
                 type="email"
                 name="email"
-                value={formData.email}
-                onChange={handleChange}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)} // Update state email
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />
@@ -89,29 +63,24 @@ const Login = ({ closeModal, openRegisterModal }) => {
               <input
                 type="password"
                 name="password"
-                value={formData.password}
-                onChange={handleChange}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)} // Update state password
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />
             </div>
 
+            {error && (
+              <div className="mb-4 text-red-500">
+                {error}
+              </div>
+            )}
             <button
               type="submit"
               className="w-full bg-teal-600 text-white py-2 rounded-md hover:bg-teal-800 transition duration-200"
             >
               Masuk
             </button>
-
-            <p className="mt-2 text-sm text-gray-600">
-              <button
-                type="button"
-                onClick={handleContactAdmin}
-                className="text-blue-600 hover:underline"
-              >
-                Lupa Password? 
-              </button>
-            </p>
           </form>
         </div>
       </div>
