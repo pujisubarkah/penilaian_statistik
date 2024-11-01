@@ -1,13 +1,10 @@
-import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { useUser } from '../hooks/useUser'; // Ensure this path is correct
+import React, { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
 import Login from './Login'; // Import the Login component
-import { useLocation } from 'react-router-dom';
+import { supabase } from '../supabaseClient'; // Make sure you import Supabase client
 
 function Navbar() {
-  const navigate = useNavigate();
-  const { user, login, logout } = useUser(); // Ensure useUser is imported correctly
-  const location = useLocation();
+  const [isModalOpen, setModalOpen] = useState(false); // State for modal
   const [user, setUser] = useState(null); // State to store user information
 
   const menu = [
@@ -16,20 +13,19 @@ function Navbar() {
     { name: 'Penilaian Mandiri', path: '/Penilaian' }
   ];
 
-  const [isLoginVisible, setLoginVisible] = useState(false);
+  const openModal = () => setModalOpen(true);
 
-  const openLogin = () => {
-    setLoginVisible(true);
-  };
+  const closeModal = () => setModalOpen(false);
 
-  const closeLogin = () => {
-    setLoginVisible(false);
-  };
-
-  const handleLogin = (userData) => {
-    login(userData);
-    setLoginVisible(false);
-  };
+  // Function for Logout
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+        console.error('Error during logout:', error.message);
+    } else {
+        setUser(null); // Reset user state to null after logout
+    }
+};
 
     // Effect to check user status and fetch cart item count
     useEffect(() => {
@@ -39,30 +35,21 @@ function Navbar() {
 
             // Check if currentUser exists before making any queries
             if (currentUser) {
-                const { data: profileData, error: profileError } = await supabase
-                    .schema('simbatik')
+                const { error: profileError } = await supabase
                     .from('unit_kerja')
                     .eq('user_id', currentUser.id)
                     .single();
 
                 if (profileError) {
                     console.error('Error fetching user profile:', profileError.message);
+                } else {
+                    setUser(currentUser);
                 }
-                setUser(currentUser);
             }
         }
-    }
   
-  // Function for Logout
-    const handleLogout = async () => {
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-            console.error('Error during logout:', error.message);
-        } else {
-            setUser(null); // Reset user state to null after logout
-            setCartItemCount(0); // Optionally reset cart item count
-        }
-    };
+  getSession(); // Call getSession when the component mounts
+}, []);
 
   return (
     <nav className="flex justify-between items-center p-4 bg-teal-700 shadow-md">
@@ -90,36 +77,35 @@ function Navbar() {
 
       {/* Login/Logout Section */}
       <div className="flex items-center gap-4">
-                            {user ? (
-                                <span onClick={handleLogout} className="text-white text-lg cursor-pointer">
-                                  Selamat Datang, {user.email || user.username}!
-                                </span>
-                                    <button
-                                        onClick={handleLogout}
-                                        className="border-2 border-white bg-teal-700 text-white py-2 px-4 rounded-lg cursor-pointer text-lg hover:bg-white hover:text-teal-700 transition"
-          >
-                                        Logout
-                                    </button>
-                                </div>
-                            ) : (
-                                <button
-                                    onClick={openModal}
-                                    className="border-2 border-white bg-teal-700 text-white py-2 px-4 rounded-lg cursor-pointer text-lg hover:bg-white hover:text-teal-700 transition"
-          >
-                                    <i className="fas fa-user mr-2"></i>
-                                    Login
-                                </button>
-                            )}
+          {user ? (
+              <div>
+                  <span onClick={handleLogout} className="text-white text-lg cursor-pointer">
+                    Selamat Datang, {user.email || user.username}!
+                  </span>
+                  <button
+                      onClick={handleLogout}
+                      className="border-2 border-white bg-teal-700 text-white py-2 px-4 rounded-lg cursor-pointer text-lg hover:bg-white hover:text-teal-700 transition"
+                  >
+                      Logout
+                  </button>
+              </div>
+          ) : (
+              <button
+                  onClick={openModal}
+                  className="border-2 border-white bg-teal-700 text-white py-2 px-4 rounded-lg cursor-pointer text-lg hover:bg-white hover:text-teal-700 transition"
+              >
+                  <i className="fas fa-user mr-2"></i>
+                  Login
+              </button>
+          )}
       </div>
 
       {/* Login Form Overlay */}
-      {isLoginVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded shadow-lg w-1/3">
-            <Login closeModal={closeLogin} onLogin={handleLogin} />
+            <Login isOpen={isModalOpen} onClose={closeModal} />
           </div>
         </div>
-      )}
     </nav>
   );
 }
