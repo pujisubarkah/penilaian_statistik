@@ -5,10 +5,27 @@ import { supabase } from '../supabaseClient';
 import 'font-awesome/css/font-awesome.min.css'; // Import Font Awesome styles if using npm
 import { gapi } from 'gapi-script'; // Import gapi for Google API
 
-const TOTAL_PAGES = 16; // Total number of questionnaire pages
+const TOTAL_PAGES = 15; // Total number of questionnaire pages
 const QUESTION_IDS = [
-  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, // Example question IDs
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, // Example question IDs
 ];
+
+// Modal component
+const Modal = ({ isOpen, onClose, children }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+      <div className="bg-white rounded-lg p-4 shadow-lg max-w-lg w-full">
+        <button onClick={onClose} className="text-red-500 float-right">
+          &times;
+        </button>
+        <div className="mt-4">{children}</div>
+      </div>
+    </div>
+  );
+};
+
 
 function Questionnaire() {
   const [selectedLevel, setSelectedLevel] = useState(null);
@@ -17,6 +34,8 @@ function Questionnaire() {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [unitKerja, setUnitKerja] = useState(null); // State to hold unit kerja name
+  const [fileUrl, setFileUrl] = useState(''); // State to hold file URL
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
 
   // Fetch unit kerja for logged-in user
   useEffect(() => {
@@ -110,7 +129,7 @@ function Questionnaire() {
 
     const { error } = await supabase
       .schema('simbatik')
-      .from('nilai_indikator') // Adjust table name as necessary
+      .from('penilaian') // Adjust table name as necessary
       .insert([{ level_id: selectedLevel, content }]);
 
     if (error) {
@@ -176,45 +195,49 @@ function Questionnaire() {
   };
 
   // Tambahkan di dalam fungsi Questionnaire, di bawah handleSave
-const handleFinalSave = async () => {
-  // Periksa apakah level sudah dipilih dan ada konten yang diisi
-  if (!selectedLevel || !content.trim()) {
-    alert('Silakan pilih level dan isi penjelasan sebelum menyimpan.');
-    return;
-  }
-
-  try {
-    // Insert data ke tabel 'penilaian' di Supabase
-    const { error } = await supabase
-      .schema('simbatik')
-      .from('penilaian') // Sesuaikan nama tabel jika berbeda
-      .insert([
-        {
-          user_id: (await supabase.auth.getUser()).data.user.id, // Menggunakan user_id dari pengguna yang login
-        
-          level_id: selectedLevel, // Menyimpan level yang dipilih
-          
-          question_id: QUESTION_IDS[currentPage - 1], // Menyimpan ID pertanyaan berdasarkan halaman saat ini
-          penjelasan: content // Menyimpan konten dari ReactQuill ke field penjelasan
-        }
-      ]);
-
-    if (error) {
-      console.error('Error saving final data:', error);
-      alert('Terjadi kesalahan saat menyimpan data final.');
-    } else {
-      alert('Data final berhasil disimpan!');
-      setSelectedLevel(null); // Reset level yang dipilih
-      setContent(''); // Reset konten
-      setCurrentPage(1); // Kembali ke halaman pertama atau sesuaikan sesuai kebutuhan
+  const handleFinalSave = async () => {
+    // Periksa apakah level sudah dipilih dan ada konten yang diisi
+    if (!selectedLevel || !content.trim()) {
+      alert('Silakan pilih level dan isi penjelasan sebelum menyimpan.');
+      return;
     }
-  } catch (error) {
-    console.error('Error:', error);
-    alert('Terjadi kesalahan saat menyimpan data final.');
-  }
-};
+  
+    // Log the fileUrl to check its value
+    console.log('File URL:', fileUrl);
+  
+    try {
+      // Insert data ke tabel 'penilaian' di Supabase
+      const { error } = await supabase
+        .schema('simbatik')
+        .from('penilaian') // Sesuaikan nama tabel jika berbeda
+        .insert([
+          {
+            user_id: (await supabase.auth.getUser()).data.user.id, // Menggunakan user_id dari pengguna yang login
+            level_id: selectedLevel, // Menyimpan level yang dipilih
+            question_id: QUESTION_IDS[currentPage - 1], // Menyimpan ID pertanyaan berdasarkan halaman saat ini
+            penjelasan: content, // Menyimpan konten dari ReactQuill ke field penjelasan
+            file_url: fileUrl || '', // Ensure fileUrl is defined; use an empty string if not
+          },
+        ]);
+  
+      if (error) {
+        console.error('Error saving final data:', error);
+        alert('Terjadi kesalahan saat menyimpan data final.');
+      } else {
+        alert('Data final berhasil disimpan!');
+        setSelectedLevel(null); // Reset level yang dipilih
+        setContent(''); // Reset konten
+        setCurrentPage(1); // Kembali ke halaman pertama atau sesuaikan sesuai kebutuhan
+        setFileUrl(''); // Reset file URL after saving
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Terjadi kesalahan saat menyimpan data final.');
+    }
+  };
 
-
+  
+  
   return (
     <div className="p-6 max-w-4xl mx-auto rounded-lg">
       <h1 className="text-xl font-bold mb-4">PENILAIAN MANDIRI</h1>
@@ -222,7 +245,10 @@ const handleFinalSave = async () => {
 
       <div className="flex justify-between items-center mb-6">
         <div>
-          <button className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded mr-2">
+        <button
+            onClick={() => setIsModalOpen(true)} // Open modal
+            className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded mr-2"
+          >
             <i className="fa fa-ellipsis-v text-white cursor-pointer"></i> RINGKASAN
           </button>
           <button
@@ -254,12 +280,18 @@ const handleFinalSave = async () => {
 
       <div className="border-t border-gray-300 pt-4 mb-6">
         {currentQuestion && (
-          <div>
-            <h2 className="text-lg font-semibold mb-2">Indikator {currentQuestion.indikator_id}</h2>
-            <p className="text-xl font-semibold mb-2">{currentQuestion.indikator_nama}</p>
-            <p className="text-gray-600 mb-4">{currentQuestion.indikator_deskripsi}</p>
-          </div>
+          <>
+            <div className="flex items-center">
+              <h2 className="text-lg font-semibold mb-2">Indikator {currentQuestion.indikator_id}</h2>
+              <i className="fa fa-lightbulb text-yellow-500" title="Informasi tentang indikator" aria-hidden="true"></i>
+            </div>
+            <div className="ml-2"> {/* This div adds spacing between the icon and the text below */}
+              <p className="text-xl font-semibold mb-2">{currentQuestion.indikator_nama}</p>
+              <p className="text-gray-600 mb-4">{currentQuestion.indikator_deskripsi}</p>
+            </div>
+          </>
         )}
+        <></>
 
         <div className="border-b-2 border-teal-600 mb-6"></div>
 
@@ -293,6 +325,10 @@ const handleFinalSave = async () => {
           Save
         </button>
       </div>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+  <h2 className="text-lg font-semibold">Ringkasan</h2>
+  <p>{currentQuestion ? currentQuestion.indikator_penjelasan : 'Loading...'}</p>
+</Modal>
     </div>
   );
 }

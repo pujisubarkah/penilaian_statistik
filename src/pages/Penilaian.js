@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import Footer from '../components/Footer';
 
 function Penilaian() {
   const navigate = useNavigate();
@@ -194,6 +195,7 @@ function Penilaian() {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     </>
   );
