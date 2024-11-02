@@ -123,7 +123,7 @@ function Questionnaire() {
 
   const handleSave = async () => {
     if (!selectedLevel || !content.trim()) {
-      alert('Silakan pilih level dan isi penjelasan.');
+      alert('Setelah pilih level silakan isi penjelasannya.');
       return;
     }
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import Radar from '../components/Radar';
 import Footer from '../components/Footer';
 
 function Penilaian() {
@@ -11,6 +12,41 @@ function Penilaian() {
   const [completedIndicators, setCompletedIndicators] = useState(0);
   const [ipsValue, setIpsValue] = useState(null); // State for IPS value
 
+ 
+
+  useEffect(() => {
+    const fetchIPSValue = async () => {
+      // Mendapatkan ID user yang sedang login
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error('Error fetching user:', userError);
+        return;
+      }
+      const userId = userData?.user?.id;
+      console.log('User ID:', userId);
+
+      // Mengambil semua nilai total_domain_skor untuk user yang sedang login
+      const { data, error } = await supabase
+        .from('penilaian_domain') // Pastikan skema tabel benar
+        .select('total_domain_skor')
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('Error fetching IPS value:', error);
+        return;
+      }
+
+      console.log('Fetched Data:', data); // Memeriksa data yang diambil
+
+      // Menghitung total skor di sisi client
+      const totalScore = data.reduce((acc, item) => acc + item.total_domain_skor, 0);
+      setIpsValue(totalScore);
+    };
+
+    fetchIPSValue();
+  }, []);
+
+  
   useEffect(() => {
     const fetchIndikators = async () => {
       const { data, error } = await supabase
@@ -137,11 +173,11 @@ function Penilaian() {
 
         {/* IPS Section */}
         <div className="bg-gray-300 p-4 rounded-md text-black font-bold mt-4 flex justify-between items-center">
-          <span>Nilai Indeks Pembangunan Statistik (IPS) Unit Kerja: {ipsValue !== null ? ipsValue : 'Loading...'}</span>
-          <button onClick={goToQuestionnaire} className="bg-teal-700 text-white px-10 py-2 rounded-md hover:bg-teal-500">
-            Lihat Isian
-          </button>
-        </div>
+      <span>Nilai Indeks Pembangunan Statistik (IPS) Unit Kerja: {ipsValue !== null ? ipsValue : 'Loading...'}</span>
+      <button onClick={goToQuestionnaire} className="bg-teal-700 text-white px-10 py-2 rounded-md hover:bg-teal-500">
+        Lihat Isian
+      </button>
+    </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
           <div className="bg-white shadow-md p-4 md:col-span-2">
@@ -188,12 +224,10 @@ function Penilaian() {
             </table>
           </div>
 
-          <div className="bg-white shadow-md p-4 md:col-span-1">
-            <h2 className="text-lg font-semibold mb-4">Overview Indikator</h2>
-            <div className="h-64 flex items-center justify-center bg-gray-200 rounded-md">
-              <span className="text-center">Chart/Graph Here</span>
-            </div>
-          </div>
+   {/* Chart Section */}
+   
+              <Radar />
+          
         </div>
         <Footer />
       </div>
