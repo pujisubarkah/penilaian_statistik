@@ -1,336 +1,173 @@
-import React, { useState, useEffect } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
-import 'font-awesome/css/font-awesome.min.css'; // Import Font Awesome styles if using npm
-import { gapi } from 'gapi-script'; // Import gapi for Google API
+import Radar from '../components/Radar';
+import KegiatanStatistik from '../components/KegiatanStatistik';
+import Footer from '../components/Footer';
 
-const TOTAL_PAGES = 15; // Total number of questionnaire pages
-const QUESTION_IDS = [
-  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, // Example question IDs
-];
+function Penilaian() {
+  const navigate = useNavigate();
+  const [indikators, setIndikators] = useState({});
+  const [activeDomain, setActiveDomain] = useState(null);
+  const [totalIndicators, setTotalIndicators] = useState(0);
+  const [completedIndicators, setCompletedIndicators] = useState(0);
+  const [ipsValue, setIpsValue] = useState(null);
 
-// Modal component
-const Modal = ({ isOpen, onClose, children }) => {
-  if (!isOpen) return null;
+  
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-      <div className="bg-white rounded-lg p-4 shadow-lg max-w-lg w-full">
-        <button onClick={onClose} className="text-red-500 float-right">
-          &times;
-        </button>
-        <div className="mt-4">{children}</div>
-      </div>
-    </div>
-  );
-};
-
-
-function Questionnaire() {
-  const [selectedLevel, setSelectedLevel] = useState(null);
-  const [content, setContent] = useState('');
-  const [levels, setLevels] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [currentQuestion, setCurrentQuestion] = useState(null);
-  const [unitKerja, setUnitKerja] = useState(null); // State to hold unit kerja name
-  const [fileUrl, setFileUrl] = useState(''); // State to hold file URL
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
-
-  // Fetch unit kerja for logged-in user
   useEffect(() => {
-    const fetchUnitKerja = async () => {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const fetchIndicatorsData = async () => {
+      // Fetch total indicators from master_indikator
+      const { data: totalData, error: totalError } = await supabase
+       .schema('simbatik')
+        .from('master_indikator')
+        .select('*');
+
+      if (totalError) {
+        console.error('Error fetching total indicators:', totalError);
+        return;
+      }
+      setTotalIndicators(totalData.length); // Set total indicators
+
+      // Fetch completed indicators from penilaian_indikator for the logged-in user
+      const { data: userData, error: userError } = await supabase.auth.getUser();
       if (userError) {
         console.error('Error fetching user:', userError);
         return;
       }
 
-      const userId = user ? user.id : null;
-      if (userId) {
-        const { data, error } = await supabase
+      const userId = userData?.user?.id; // Ensure userId is correctly obtained
+      const { data: completedData, error: completedError } = await supabase
           .schema('simbatik')
-          .from('unit_kerja')
-          .select('unit_kerja') // Adjust based on actual field name
-          .eq('user_id', userId)
-          .single();
+          .from('penilaian_indikator')
+          .select('indikator_id')
+          .eq('user_id', userId);
+      
 
-        if (error) {
-          console.error('Error fetching unit kerja:', error);
-        } else {
-          setUnitKerja(data?.unit_kerja || ''); // Set unit kerja state
-        }
+      if (completedError) {
+        console.error('Error fetching completed indicators:', completedError);
+        return;
       }
-    };
+      setCompletedIndicators(completedData.length); // Set completed indicators
 
-    fetchUnitKerja();
-  }, []);
-
-  // Fetch levels from Supabase
-  useEffect(() => {
-    const fetchLevels = async () => {
-      const { data: levelData, error: levelError } = await supabase
-        .schema('simbatik')
-        .from('level')
-        .select('id, level_nama, level_penjelasan');
-
-      if (levelError) {
-        console.error('Error fetching levels:', levelError);
-      } else {
-        setLevels(levelData || []);
-      }
-    };
-
-    fetchLevels();
-  }, []);
-
-  // Fetch current question based on currentPage
-  useEffect(() => {
-    const fetchQuestion = async () => {
-      const questionId = QUESTION_IDS[currentPage - 1];
-      const { data: questionData, error: questionError } = await supabase
-        .schema('simbatik')
-        .from('indikator')
-        .select('*')
-        .eq('id', questionId)
-        .single();
-
-      if (questionError) {
-        console.error('Error fetching question:', questionError);
-      } else {
-        setCurrentQuestion(questionData || null);
-      }
-    };
-
-    fetchQuestion();
-  }, [currentPage]);
-
-  const handleLevelClick = (levelId) => {
-    setSelectedLevel(levelId);
-  };
-
-  const handleContentChange = (value) => {
-    setContent(value);
-  };
-
-  const handleFileChange = async (event) => {
-    const file = event.target.files[0];
-
-    if (file) {
-      await uploadFileToGoogleDrive(file);
-    }
-  };
-
-  const handleSave = async () => {
-    if (!selectedLevel || !content.trim()) {
-      alert('Setelah pilih level silakan isi penjelasannya.');
-      return;
-    }
-
-    const { error } = await supabase
+      // Fetch and group the indicators
+      const { data: indicatorData, error: indicatorError } = await supabase
       .schema('simbatik')
-      .from('penilaian') // Adjust table name as necessary
-      .insert([{ level_id: selectedLevel, content }]);
+        .from('indikator')
+        .select('*');
 
-    if (error) {
-      console.error('Error saving data:', error);
-      alert('Error saving data.');
-    } else {
-      alert('Data saved successfully!');
-      setSelectedLevel(null);
-      setContent('');
-    }
-  };
+      if (indicatorError) {
+        console.error('Error fetching indicators:', indicatorError);
+      } else {
+        const groupedIndikators = indicatorData.reduce((acc, curr) => {
+          const domain = curr.domain_nama;
+          if (!acc[domain]) {
+            acc[domain] = {
+              id: curr.domain_id,
+              name: domain,
+              domain_bobot: curr.domain_bobot,
+              indicators: [],
+            };
+          }
+          acc[domain].indicators.push({
+            id: curr.indikator_id,
+            name: curr.indikator_nama,
+            completed: curr.completed,
+            indicator_bobot: curr.indicator_bobot,
+          });
+          return acc;
+        }, {});
 
-  const uploadFileToGoogleDrive = async (file) => {
-    const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID; // Use environment variables
-    const SCOPES = process.env.REACT_APP_GOOGLE_CLIENT_SECRET;
-
-    // Load the Google API
-    await new Promise((resolve) => {
-      gapi.load('client:auth2', async () => {
-        await gapi.auth2.init({
-          client_id: CLIENT_ID,
-          scope: SCOPES,
-        });
-        resolve();
-      });
-    });
-
-    await gapi.auth2.getAuthInstance().signIn();
-
-    const accessToken = gapi.auth.getToken().access_token;
-
-    const metadata = {
-      name: file.name,
-      mimeType: file.type,
+        setIndikators(groupedIndikators);
+      }
     };
 
-    const form = new FormData();
-    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-    form.append('file', file);
+    fetchIndicatorsData();
+  }, []);
 
-    try {
-      const response = await fetch(
-        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
-        {
-          method: 'POST',
-          headers: new Headers({ Authorization: 'Bearer ' + accessToken }),
-          body: form,
-        }
-      );
-      const result = await response.json();
-      console.log('File uploaded successfully:', result);
-      alert('File uploaded successfully to Google Drive!');
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      alert('Error uploading file to Google Drive.');
-    }
+  const goToQuestionnaire = () => {
+    navigate('/questionnaire');
   };
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-    setSelectedLevel(null);
-    setContent('');
-  };
-
-  // Tambahkan di dalam fungsi Questionnaire, di bawah handleSave
-  const handleFinalSave = async () => {
-    // Periksa apakah level sudah dipilih dan ada konten yang diisi
-    if (!selectedLevel || !content.trim()) {
-      alert('Silakan pilih level dan isi penjelasan sebelum menyimpan.');
-      return;
-    }
-  
-    // Log the fileUrl to check its value
-    console.log('File URL:', fileUrl);
-  
-    try {
-      // Insert data ke tabel 'penilaian' di Supabase
-      const { error } = await supabase
-        .schema('simbatik')
-        .from('penilaian') // Sesuaikan nama tabel jika berbeda
-        .insert([
-          {
-            user_id: (await supabase.auth.getUser()).data.user.id, // Menggunakan user_id dari pengguna yang login
-            level_id: selectedLevel, // Menyimpan level yang dipilih
-            question_id: QUESTION_IDS[currentPage - 1], // Menyimpan ID pertanyaan berdasarkan halaman saat ini
-            penjelasan: content, // Menyimpan konten dari ReactQuill ke field penjelasan
-            file_url: fileUrl || '', // Ensure fileUrl is defined; use an empty string if not
-          },
-        ]);
-  
-      if (error) {
-        console.error('Error saving final data:', error);
-        alert('Terjadi kesalahan saat menyimpan data final.');
-      } else {
-        alert('Data final berhasil disimpan!');
-        setSelectedLevel(null); // Reset level yang dipilih
-        setContent(''); // Reset konten
-        setCurrentPage(1); // Kembali ke halaman pertama atau sesuaikan sesuai kebutuhan
-        setFileUrl(''); // Reset file URL after saving
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Terjadi kesalahan saat menyimpan data final.');
-    }
-  };
-
-  
-  
   return (
-    <div className="p-6 max-w-4xl mx-auto rounded-lg">
-      <h1 className="text-xl font-bold mb-4">PENILAIAN MANDIRI</h1>
-      <p className="text-gray-600 mb-6">Penilaian Mandiri {unitKerja ? `Unit Kerja ${unitKerja}` : 'Loading...'}</p>
-
-      <div className="flex justify-between items-center mb-6">
-        <div>
-        <button
-            onClick={() => setIsModalOpen(true)} // Open modal
-            className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded mr-2"
-          >
-            <i className="fa fa-ellipsis-v text-white cursor-pointer"></i> RINGKASAN
-          </button>
-          <button
-  onClick={handleFinalSave} // Tambahkan handler ini
-  className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded"
->
-  FINAL
-</button>
-        </div>
-
-        {/* Pagination Controls */}
-        <div className="flex">
-          <button
-            disabled={currentPage === 1}
-            onClick={() => handlePageChange(currentPage - 1)}
-            className={`px-4 py-2 bg-teal-600 text-white rounded ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            <i className="fa fa-chevron-left"></i>
-          </button>
-          <button
-            disabled={currentPage === TOTAL_PAGES}
-            onClick={() => handlePageChange(currentPage + 1)}
-            className={`px-4 py-2 bg-teal-600 text-white rounded ${currentPage === TOTAL_PAGES ? 'opacity-50 cursor-not-allowed' : ''} ml-2`}
-          >
-            <i className="fa fa-chevron-right"></i>
-          </button>
+    <>
+      <div
+        className="relative bg-cover bg-center text-white p-6 mb-6"
+        style={{ backgroundImage: 'url(https://lan.go.id/wp-content/uploads/2022/06/WhatsApp-Image-2022-06-24-at-13.43.42-1024x682.jpeg)' }}
+      >
+        <div className="absolute inset-0 bg-teal-700 opacity-75"></div>
+        <div className="relative z-10 text-center">
+          <h1 className="text-4xl font-bold">EVALUASI PENYELENGGARAAN STATISTIK SEKTORAL</h1>
+          <p className="text-2xl mt-2">
+            Pembinaan Statistik Sektoral dan Mini EPSS Internal Lembaga Administrasi Negara
+          </p>
         </div>
       </div>
 
-      <div className="border-t border-gray-300 pt-4 mb-6">
-        {currentQuestion && (
-          <>
-            <div className="flex items-center">
-              <h2 className="text-lg font-semibold mb-2">Indikator {currentQuestion.indikator_id}</h2>
-              <i className="fa fa-lightbulb text-yellow-500" title="Informasi tentang indikator" aria-hidden="true"></i>
-            </div>
-            <div className="ml-2"> {/* This div adds spacing between the icon and the text below */}
-              <p className="text-xl font-semibold mb-2">{currentQuestion.indikator_nama}</p>
-              <p className="text-gray-600 mb-4">{currentQuestion.indikator_deskripsi}</p>
-            </div>
-          </>
-        )}
-        <></>
+      <div className="container mx-auto p-6">
+        <h1 className="text-2xl font-bold mb-4">PENILAIAN MANDIRI</h1>
+        <p className="text-left text-md text-gray-700">Penilaian Mandiri Lembaga Administrasi Negara</p>
 
-        <div className="border-b-2 border-teal-600 mb-6"></div>
+        <div className={`p-4 rounded-md text-white mt-4 ${completedIndicators === totalIndicators ? 'bg-teal-600' : 'bg-teal-600'}`}>
+          {completedIndicators === totalIndicators ? 'Pengisian sudah selesai' : 'Pengisian belum selesai'}
+        </div>
 
-        {/* Levels Section */}
-        <div className="space-y-2">
-          {levels.length > 0 && levels.map((level) => (
-            <div className="p-4 border rounded-lg" key={level.id}>
-              <div
-                onClick={() => handleLevelClick(level.id)}
-                className={`p-4 border rounded-lg cursor-pointer transition 
-                  ${selectedLevel === level.id ? 'bg-teal-600 text-white' : 'bg-white'} 
-                  hover:bg-teal-600 hover:text-white`}
-              >
-                <h3 className="font-semibold">{level.level_nama}</h3>
-                <p className="text-gray-600">{level.level_penjelasan}</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          <div className="bg-white shadow-md p-4 md:col-span-2">
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold mb-4">Kegiatan Statistik yang dilakukan</h2>
+              <div className="mt-2">
+                <div className="border-b py-2">
+                  <h3 className="font-medium">Kegiatan --</h3>
+                  <p>Nama Kegiatan Statistik</p>
+                  <p className="text-gray-500">Tahun | Unit Kerja | Tim Kerja/Poksi</p>
+                </div>
               </div>
             </div>
-          ))}
+          </div>
+
+          <div className="bg-teal-700 text-white p-4 rounded-md shadow-md md:col-span-1">
+        <div className="text-4xl font-semibold">{completedIndicators}/{totalIndicators}</div>
+        <div>Indikator sudah dilengkapi</div>
+        <div className="my-2 w-full bg-gray-300 h-2 rounded">
+          <div
+            className="bg-white h-full rounded"
+            style={{ width: totalIndicators > 0 ? `${(completedIndicators / totalIndicators) * 100}%` : '0%' }}
+          />
         </div>
-
-        {/* ReactQuill Editor for Comments */}
-        <div className="mt-4">
-          <ReactQuill value={content} onChange={handleContentChange} />
-        </div>
-
-        {/* File Upload */}
-        <input type="file" onChange={handleFileChange} className="mt-4" />
-
-        {/* Save Button */}
-        <button onClick={handleSave} className="mt-4 bg-teal-600 text-white px-4 py-2 rounded">
-          Save
-        </button>
+        <div className="text-sm">{Math.round((completedIndicators / totalIndicators) * 100)}% Completed</div>
       </div>
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-  <h2 className="text-lg font-semibold">Ringkasan</h2>
-  <p>{currentQuestion ? currentQuestion.indikator_penjelasan : 'Loading...'}</p>
-</Modal>
-    </div>
+        </div>
+
+        {/* IPS Section */}
+        <div className="bg-gray-300 p-4 rounded-md text-black font-bold mt-4 flex justify-between items-center">
+          <span>Nilai Indeks Pembangunan Statistik (IPS) Unit Kerja: {ipsValue !== null ? ipsValue : 'Loading...'}</span>
+          <button onClick={goToQuestionnaire} className="bg-teal-700 text-white px-10 py-2 rounded-md hover:bg-teal-500">
+            Lihat Isian
+          </button>
+          </div>
+
+          <div className="flex flex-col md:flex-row gap-4 mt-4">
+  <div className="flex-grow"> {/* This will take the remaining width */}
+    <KegiatanStatistik />
+  </div>
+  <div className="w-1/3"> {/* Set a fixed width for Radar */}
+    <Radar />
+  </div>
+</div>
+</div>
+
+
+      <Footer />
+    </>
   );
 }
 
-export default Questionnaire; 
+export default Penilaian;
+
+
+
+
+
+
+
