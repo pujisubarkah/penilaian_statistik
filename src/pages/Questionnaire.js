@@ -4,6 +4,7 @@ import 'react-quill/dist/quill.snow.css';
 import FileUploader from '../components/FileUploader';
 import { supabase } from '../supabaseClient';
 import 'font-awesome/css/font-awesome.min.css';
+import Sidebar from '../components/Sidebar'; // Import Sidebar
 
 // Constants
 const TOTAL_PAGES = 15; // Total number of questionnaire pages
@@ -34,6 +35,7 @@ function Questionnaire() {
   const [unitKerja, setUnitKerja] = useState(null);
   const [fileUrl, setFileUrl] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for sidebar
   const [summaryContent, setSummaryContent] = useState('');
 
   // Fetch unit kerja for logged-in user
@@ -146,6 +148,13 @@ const handleLightbulbClick = () => {
 };
 
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(prev => !prev);
+  };
+
+  // Removed unused scrollToQuestion function
+  
+
   return (
     <div className="p-6 max-w-4xl mx-auto rounded-lg">
       <h1 className="text-xl font-bold mb-4">PENILAIAN MANDIRI</h1>
@@ -153,13 +162,16 @@ const handleLightbulbClick = () => {
 
       <div className="flex justify-between items-center mb-6">
         <div>
-          <button className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded mr-2">
-            <i className="fa fa-ellipsis-v text-white cursor-pointer"></i> RINGKASAN
-          </button>
+        <button onClick={toggleSidebar} className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded mr-2">
+  <i className="fa fa-ellipsis-v text-white cursor-pointer"></i> RINGKASAN
+</button>
+
           <button onClick={handleFinalSave} className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded">
             FINAL
           </button>
         </div>
+
+
 
         {/* Pagination Controls */}
         <div className="flex">
@@ -226,10 +238,13 @@ const handleLightbulbClick = () => {
   </div>
 </Modal>
 
-
-    </div>
+    {/* Render Sidebar */}
+    <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} content={summaryContent} />
+  </div>
   );
 }
 
 export default Questionnaire;
+
+
 
