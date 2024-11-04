@@ -95,10 +95,10 @@ function Questionnaire() {
   };
 
   // Handle File Upload
-  const handleFileUpload = async (url) => {
-    setFileUrl(url);
-    await insertOrUpdateData(selectedLevel, content, url);
-  };
+  // const handleFileUpload = async (url) => {
+  //   setFileUrl(url);
+  //  await insertOrUpdateData(selectedLevel, content, url);
+  //};
 
   // Insert or Update Data in 'penilaian' table
   const insertOrUpdateData = async (levelId, content, fileUrl) => {
@@ -116,7 +116,7 @@ function Questionnaire() {
         const { error } = await supabase
           .schema('simbatik')
           .from('penilaian2')
-          .update({ level_id: levelId, penjelasan: content, file_url: fileUrl })
+          .update({ level_id: levelId, penjelasan: content, file_url: fileUrl, status: 'draf' })
           .eq('user_id', penilaianData.user_id)
           .eq('indikator_id', penilaianData.indikator_id);
         if (error) console.error('Error updating data:', error);
@@ -125,12 +125,36 @@ function Questionnaire() {
         const { error } = await supabase
           .schema('simbatik')
           .from('penilaian2')
-          .insert([{ user_id: (await supabase.auth.getUser()).data.user.id, level_id: levelId, indikator_id: QUESTION_IDS[currentPage - 1], penjelasan: content, file_url: fileUrl }]);
+          .insert([{ user_id: (await supabase.auth.getUser()).data.user.id, level_id: levelId, indikator_id: QUESTION_IDS[currentPage - 1], penjelasan: content, file_url: fileUrl, status: 'draf' }]);
         if (error) console.error('Error inserting data:', error);
       }
     } catch (error) {
       console.error('Error in insertOrUpdateData:', error);
     }
+  };
+
+  const handleFinal = async () => {
+    try {
+      const { data: penilaianData } = await supabase
+        .schema('simbatik')
+        .from('penilaian2')
+        .select('*')
+        .eq('user_id', (await supabase.auth.getUser()).data.user.id)
+        .eq('indikator_id', QUESTION_IDS[currentPage - 1])
+        .single();
+
+      if (penilaianData) {
+      const { error } = await supabase
+          .schema('simbatik')
+          .from('penilaian2')
+          .update({ status: 'final' })
+          .eq('user_id', penilaianData.user_id)
+          .eq('indikator_id', penilaianData.indikator_id);
+          if (error) console.error('Error updating data:', error);
+        } 
+      } catch (error) {
+        console.error('Error in handleFinal:', error);
+      }
   };
 
   // Function to handle lightbulb click
@@ -196,8 +220,8 @@ const handleLightbulbClick = () => {
             <i className="fa fa-ellipsis-v text-white cursor-pointer"></i> RINGKASAN
           </button>
 
-          <button onClick={insertOrUpdateData} className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded">
-            SIMPAN
+          <button onClick={handleFinal} className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded">
+            FINAL
           </button>
         </div>
 
@@ -257,7 +281,16 @@ const handleLightbulbClick = () => {
       </div>
 
       {/* File Uploader */}
-      {/* <FileUploader onFileUpload={setFileUrl} /> */}
+      <div>
+      {/* Komponen lainnya */}
+      <FileUploader indikatorId={QUESTION_IDS[currentPage - 1]} setFileUrl={url => {
+        console.log('File URL set in Questionnaire:', url); // Debugging line
+        setFileUrl(url);
+        }} />
+
+      {/* Setelah upload, URL file tersimpan di fileUrl */}
+      {fileUrl && <p>File URL: {fileUrl}</p>}
+      </div>
 
       {/* Render Summary Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
@@ -268,7 +301,9 @@ const handleLightbulbClick = () => {
       </Modal>
 
       {/* Render Sidebar */}
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} content={summaryContent} />
+      <Sidebar isOpen={isSidebarOpen}
+       setCurrentPage={(id) => setCurrentPage(QUESTION_IDS.indexOf(id) + 1)}
+       onClose={() => setIsSidebarOpen(false)} content={summaryContent} />
     </div>
   );
 }
