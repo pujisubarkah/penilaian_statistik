@@ -2,10 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 
-function Sidebar({ isOpen, scrollToQuestion = () => {} }) {
+function Sidebar({ isOpen, setCurrentPage }) {
     const [questions, setQuestions] = useState([]);
     const handleQuestionClick = (questionId) => {
-        scrollToQuestion(questionId);
+        setCurrentPage(questionId);
     };
 
     useEffect(() => {
@@ -28,9 +28,14 @@ function Sidebar({ isOpen, scrollToQuestion = () => {} }) {
 
             const { data, error } = await supabase
                 .schema('simbatik')
-                .from('penilaian')
-                .select(`question_id, status, master_indikator(indikator_nama)`)
-                .eq('user_id', userId);
+                .from('indikator')
+                .select(`
+                    id,
+                    indikator_nama,
+                    penilaian2:penilaian2(indikator_id, status)
+                `)
+                .eq('penilaian2.user_id', userId)
+                .order('id', { ascending: true });
 
             if (error) {
                 console.error('Error fetching questions:', error);
@@ -38,9 +43,9 @@ function Sidebar({ isOpen, scrollToQuestion = () => {} }) {
             }
 
             const formattedData = data.map(question => ({
-                id: question.question_id,
-                text: question.master_indikator.indikator_nama,
-                completed: question.status === 'completed',
+                indikator_id: question.id,
+                text: question.indikator_nama,
+                completed: question.penilaian2.length > 0 && question.penilaian2[0].status === 'final',
             }));
 
             setQuestions(formattedData);
@@ -60,7 +65,7 @@ function Sidebar({ isOpen, scrollToQuestion = () => {} }) {
                     <li key={question.id} className="flex items-center justify-between">
                         <span
                             className={`text-sm cursor-pointer ${question.completed ? 'text-teal-600' : 'text-gray-500'}`}
-                            onClick={() => scrollToQuestion(question.id)}
+                            onClick={() => handleQuestionClick(question.id)}
                         >
                             {question.text}
                         </span>
