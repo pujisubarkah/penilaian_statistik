@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../supabaseClient'; // Ensure you import the configured Supabase client
+import { supabase } from '../supabaseClient';
 
-function FileUploader() {
+function FileUploader({ indikatorId, setFileUrl }) {
   const [file, setFile] = useState(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,35 +33,39 @@ function FileUploader() {
 
   const handleUpload = async () => {
     if (!file || !userId) return;
-  
+
     setLoading(true);
     try {
       // Define the storage path, e.g., use user ID as a folder
       const filePath = `${userId}/${file.name}`;
-  
+
       // Upload the file to Supabase Storage
       const { data, error } = await supabase.storage
-        .from('User_uploads') // Updated bucket name to match your bucket
+        .from('User_uploads')
         .upload(filePath, file);
-  
+
       if (error) throw error;
-  
-      // Get the public URL (if bucket is public) or use getSignedUrl for private access
+
+      // Get the public URL (assuming the bucket is public)
       const { publicURL, error: urlError } = supabase.storage
         .from('User_uploads')
         .getPublicUrl(filePath);
-  
+
       if (urlError) throw urlError;
-  
-      // Optionally: Save the file URL to your Supabase database
+
+      // Save the file URL to Supabase database in penilaian2 table
       const { error: dbError } = await supabase
-        .from('simbatik.penilaian') // Specify schema and table
-        .insert([{ file_url: publicURL, user_id: userId }]);
-  
+        .schema('simbatik')
+        .from('penilaian2')
+        .update({ file_url: publicURL })
+        .eq('user_id', userId)
+        .eq('indikator_id', indikatorId);
+
       if (dbError) throw dbError;
-  
+
       setMessage('File uploaded successfully!');
-      console.log('File URL:', publicURL);
+      setFileUrl(publicURL);
+
     } catch (error) {
       console.error("Error:", error);
       setMessage('File upload failed: ' + error.message);
@@ -70,7 +74,6 @@ function FileUploader() {
       setFile(null);
     }
   };
-  
 
   return (
     <div className="file-uploader">
