@@ -12,8 +12,79 @@ function Penilaian() {
   const [totalIndicators, setTotalIndicators] = useState(0);
   const [completedIndicators, setCompletedIndicators] = useState(0);
   const [ipsValue, setIpsValue] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [namaKegiatan, setNamaKegiatan] = useState("");
+  const [tahunKegiatan, setTahunKegiatan] = useState("");
+  const [subunitKerja, setsubunitKerja] = useState("");
+  const [jenisKegiatan, setJenisKegiatan] = useState("");
+  const [kegiatanList, setKegiatanList] = useState([]);
+  const [unitKerja, setUnitKerja] = useState('');
 
+  // Fetch saved activities from the database
+  useEffect(() => {
+    const fetchKegiatan = async () => {
+      const { data, error } = await supabase
+        .schema("simbatik")
+        .from("kegiatan")
+        .select("*");
+
+      if (error) {
+        console.error("Error fetching kegiatan:", error);
+      } else {
+        setKegiatanList(data);
+      }
+    };
+
+    fetchKegiatan();
+  }, []);
+
+  const handleAddKegiatan = async (e) => {
+    e.preventDefault();
+    const userId = (await supabase.auth.getUser()).data.user.id;
+
+    const { error } = await supabase
+      .schema("simbatik")
+      .from("kegiatan")
+      .insert([
+        {
+          user_id: userId,
+          kegiatan_statistik: namaKegiatan,
+          sub_unitkerja: subunitKerja,
+          tahun: tahunKegiatan,
+          jenis_kegiatan: jenisKegiatan,
+        },
+      ]);
+
+    if (error) {
+      console.error("Error adding kegiatan:", error);
+    } else {
+      // Refresh the list of kegiatan after adding a new one
+      setKegiatanList([
+        ...kegiatanList,
+        { kegiatan_statistik: namaKegiatan, 
+          sub_unitkerja: subunitKerja,
+          tahun: tahunKegiatan,
+          jenis_kegiatan: jenisKegiatan },
+      ]);
+    }
+  };
   
+    // Fetch unit kerja for logged-in user
+    useEffect(() => {
+      const fetchUnitKerja = async () => {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) return console.error(userError || 'User not found');
+        const { data, error } = await supabase
+          .schema('simbatik')
+          .from('unit_kerja')
+          .select('unit_kerja')
+          .eq('user_id', user.id)
+          .single();
+        if (error) console.error('Error fetching unit kerja:', error);
+        else setUnitKerja(data?.unit_kerja || '');
+      };
+      fetchUnitKerja();
+    }, []);
 
   useEffect(() => {
     const fetchIndicatorsData = async () => {
@@ -52,7 +123,7 @@ function Penilaian() {
 
       // Fetch and group the indicators
       const { data: indicatorData, error: indicatorError } = await supabase
-      .schema('simbatik')
+        .schema('simbatik')
         .from('indikator')
         .select('*');
 
@@ -117,12 +188,114 @@ function Penilaian() {
             <div className="space-y-4">
               <h2 className="text-lg font-semibold mb-4">Kegiatan Statistik yang dilakukan</h2>
               <div className="mt-2">
-                <div className="border-b py-2">
-                  <h3 className="font-medium">Kegiatan --</h3>
-                  <p>Nama Kegiatan Statistik</p>
-                  <p className="text-gray-500">Tahun | Unit Kerja | Tim Kerja/Poksi</p>
+            {kegiatanList.map((kegiatan, index) => (
+              <div key={index} className="border-b py-2">
+                <h3 className="font-medium">{kegiatan.kegiatan_statistik}</h3>
+                <p>{kegiatan.jenis_kegiatan}</p>
+                <p className="text-gray-500">{kegiatan.tahun} | {unitKerja} | {kegiatan.sub_unitkerja}</p>
+              </div>
+            ))}
+
+            <button
+              onClick={() => setShowForm(true)}
+              className="bg-teal-700 text-white px-4 py-2 rounded-md hover:bg-teal-500 mt-4"
+            >
+              Tambah Kegiatan Statistik
+            </button>
+
+            {/* Popup modal for the form */}
+            {showForm && (
+              <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+                <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                  <h2 className="text-lg font-semibold mb-4">Tambah Kegiatan Statistik</h2>
+                  <form onSubmit={handleAddKegiatan}>
+                    <div className="mb-4">
+                      <label
+                        className="block text-gray-700 text-sm font-bold mb-2"
+                        htmlFor="namaKegiatan"
+                      >
+                        Nama Kegiatan
+                      </label>
+                      <input
+                        type="text"
+                        id="namaKegiatan"
+                        value={namaKegiatan}
+                        onChange={(e) => setNamaKegiatan(e.target.value)}
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        required
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label
+                        className="block text-gray-700 text-sm font-bold mb-2"
+                        htmlFor="tahunKegiatan"
+                      >
+                        Tahun Kegiatan
+                      </label>
+                      <input
+                        type="text"
+                        id="tahunKegiatan"
+                        value={tahunKegiatan}
+                        onChange={(e) => setTahunKegiatan(e.target.value)}
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        required
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label
+                        className="block text-gray-700 text-sm font-bold mb-2"
+                        htmlFor="subunitKerja"
+                      >
+                        Tim Kerja/Poksi
+                      </label>
+                      <input
+                        type="text"
+                        id="subunitKerja"
+                        value={subunitKerja}
+                        onChange={(e) => setsubunitKerja(e.target.value)}
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        required
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label
+                        className="block text-gray-700 text-sm font-bold mb-2"
+                        htmlFor="jenisKegiatan"
+                      >
+                        Jenis Kegiatan
+                      </label>
+                      <select
+                        id="jenisKegiatan"
+                        value={jenisKegiatan}
+                        onChange={(e) => setJenisKegiatan(e.target.value)}
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        required
+                      >
+                        <option value="">Pilih Jenis Kegiatan</option>
+                        <option value="Kompilasi Data">Kompilasi Data</option>
+                        <option value="Survei">Survei</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <button
+                        type="submit"
+                        className="bg-teal-700 text-white px-4 py-2 rounded-md hover:bg-teal-500"
+                      >
+                        Tambah
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowForm(false)}
+                        className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-400"
+                      >
+                        Batal
+                      </button>
+                    </div>
+                  </form>
                 </div>
               </div>
+            )}
+          </div>
             </div>
           </div>
 
@@ -164,10 +337,3 @@ function Penilaian() {
 }
 
 export default Penilaian;
-
-
-
-
-
-
-
