@@ -28,6 +28,7 @@ const Login = ({ isOpen, onClose }) => {
       }
     };
 
+  
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent form submission
     await signInWithEmail();  // Panggil fungsi sign-in
