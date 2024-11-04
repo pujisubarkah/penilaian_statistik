@@ -94,6 +94,11 @@ function Questionnaire() {
     await insertOrUpdateData(selectedLevel, value, fileUrl);
   };
 
+  const handleFileUrl = async (value) => {
+    setFileUrl(value);
+    await insertOrUpdateData(selectedLevel, content, value);
+  };
+
   // Handle File Upload
   // const handleFileUpload = async (url) => {
   //   setFileUrl(url);
@@ -281,18 +286,30 @@ const handleLightbulbClick = () => {
       </div>
 
       {/* File Uploader */}
-       <FileUploader onFileUpload={setFileUrl} />
-
-
       <div>
-      {/* Komponen lainnya */}
+      <div className="border rounded mb-4 p-4" style={{height: '150px'}}>
+        <h3 className="font-semibold"> Link Bukti Dukung</h3>
+        <p className="text-gray-600"> Input link file yang mendukung penilaian Anda yang telah diunggah pada Google Drive</p>
+        <input 
+            type="text" 
+            className="border rounded w-full p-2 mt-2" 
+            placeholder="Masukkan link file" 
+            value={fileUrl}
+            onChange={(e) => handleFileUrl(e.target.value)}
+          />
+        <a href={fileUrl} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">Lihat File</a>
+      </div>
+      {/* Komponen lainnya
       <FileUploader indikatorId={QUESTION_IDS[currentPage - 1]} setFileUrl={url => {
-        console.log('File URL set in Questionnaire:', url); // Debugging line
-        setFileUrl(url);
-        }} />
+      //  console.log('File URL set in Questionnaire:', url); // Debugging line
+      //  setFileUrl(url);
+      //  }} /> */
+      }
 
-      {/* Setelah upload, URL file tersimpan di fileUrl */}
-      {fileUrl && <p>File URL: {fileUrl}</p>}
+      {/* Setelah upload, URL file tersimpan di fileUrl
+      {fileUrl && <p>File URL: {fileUrl}</p>}*/
+      }
+
       </div>
 
       {/* Render Summary Modal */}
