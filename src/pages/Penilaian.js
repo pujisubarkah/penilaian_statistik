@@ -160,6 +160,28 @@ function Penilaian() {
     navigate('/questionnaire');
   };
 
+  const handleDeleteKegiatan = async (id) => {
+    const { error } = await supabase
+      .schema("simbatik")
+      .from("kegiatan")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error deleting kegiatan:", error);
+    } else {
+      setKegiatanList(kegiatanList.filter((kegiatan) => kegiatan.id !== id));
+    }
+  };
+
+  const handleEditKegiatan = (kegiatan) => {
+    setNamaKegiatan(kegiatan.kegiatan_statistik);
+    setTahunKegiatan(kegiatan.tahun);
+    setsubunitKerja(kegiatan.sub_unitkerja);
+    setJenisKegiatan(kegiatan.jenis_kegiatan);
+    setShowForm(true);
+  };
+
   return (
     <>
       <div
@@ -188,13 +210,32 @@ function Penilaian() {
             <div className="space-y-4">
               <h2 className="text-lg font-semibold mb-4">Kegiatan Statistik yang dilakukan</h2>
               <div className="mt-2">
-            {kegiatanList.map((kegiatan, index) => (
-              <div key={index} className="border-b py-2">
-                <h3 className="font-medium">{kegiatan.kegiatan_statistik}</h3>
-                <p>{kegiatan.jenis_kegiatan}</p>
-                <p className="text-gray-500">{kegiatan.tahun} | {unitKerja} | {kegiatan.sub_unitkerja}</p>
+              {kegiatanList.map((kegiatan, index) => (
+              <div key={index} className="border-b py-2 flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium flex items-center">
+                    {kegiatan.kegiatan_statistik}
+                    <button
+                      onClick={() => handleEditKegiatan(kegiatan)}
+                      className="bg-yellow-500 text-white px-2 py-1 rounded-md hover:bg-yellow-400 ml-2 text-sm"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteKegiatan(kegiatan.id)}
+                      className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-400 ml-2 text-sm"
+                    >
+                      Delete
+                    </button>
+                  </h3>
+                  <p>{kegiatan.jenis_kegiatan}</p>
+                  <p className="text-gray-500">
+                    {kegiatan.tahun} | {unitKerja} | {kegiatan.sub_unitkerja}
+                  </p>
+                </div>
               </div>
             ))}
+
 
             <button
               onClick={() => setShowForm(true)}
