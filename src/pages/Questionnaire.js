@@ -227,7 +227,7 @@ const handleLightbulbClick = () => {
      
 
       {/* File Uploader */}
-                  {/* <FileUploader onFileUpload={setFileUrl} /> */}
+                   <FileUploader onFileUpload={setFileUrl} /> 
 
       {/* Render Summary Modal */}
    
