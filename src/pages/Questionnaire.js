@@ -265,17 +265,15 @@ const handleLightbulbClick = () => {
       </div>
 
       {/* Levels Section */}
-      <div className="space-y-2">
+      <div className="space-y-2 border rounded mb-4 p-4">
         {levels.length > 0 && levels.map((level) => (
-          <div className="p-4 border rounded-lg" key={level.id}>
-            <div 
+          <div key={level.id}
               onClick={() => handleLevelClick(level.id)} 
               className={`p-4 border rounded-lg cursor-pointer transition 
               ${selectedLevel === level.id ? 'bg-teal-600 text-white' : 'bg-white'} 
               hover:bg-teal-600 hover:text-white`}>
               <h3 className="font-semibold">{level.level_nama}</h3>
               <p className="text-gray-600">{level.level_penjelasan}</p>
-            </div>
           </div>
         ))}
       </div>
