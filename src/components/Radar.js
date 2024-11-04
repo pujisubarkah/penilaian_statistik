@@ -41,7 +41,7 @@ const Radar = () => {
         {
           data: data.reduce((acc, item) => {
             // Scale score to be between 0 and 2
-            acc[item.domain_nama] = Math.min(item.total_domain_skor / 2.5, 2);
+            acc[item.domain_nama] = Math.min(item.total_domain_skor*100 / item.domain_bobot, 2);
             return acc;
           }, {}),
           meta: { color: 'blue' },
