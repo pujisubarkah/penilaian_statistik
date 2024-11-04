@@ -281,6 +281,9 @@ const handleLightbulbClick = () => {
       </div>
 
       {/* File Uploader */}
+       <FileUploader onFileUpload={setFileUrl} />
+
+
       <div>
       {/* Komponen lainnya */}
       <FileUploader indikatorId={QUESTION_IDS[currentPage - 1]} setFileUrl={url => {
