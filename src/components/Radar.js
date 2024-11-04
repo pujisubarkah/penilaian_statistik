@@ -22,7 +22,7 @@ const Radar = () => {
       const { data, error } = await supabase
         .schema('simbatik') // Ensure this schema is correct
         .from('penilaian_domain')
-        .select('total_domain_skor, domain_nama')
+        .select('*')
         .eq('user_id', userId);
 
       if (error) {
@@ -41,7 +41,7 @@ const Radar = () => {
         {
           data: data.reduce((acc, item) => {
             // Scale score to be between 0 and 2
-            acc[item.domain_nama] = Math.min(item.total_domain_skor*100 / item.domain_bobot, 2);
+            acc[item.domain_nama] = Math.min(item.total_domain_skor * 100 / (item.domain_bobot * 5), 2);
             return acc;
           }, {}),
           meta: { color: 'blue' },
