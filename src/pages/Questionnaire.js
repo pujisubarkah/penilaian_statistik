@@ -4,16 +4,14 @@ import 'react-quill/dist/quill.snow.css';
 import FileUploader from '../components/FileUploader';
 import { supabase } from '../supabaseClient';
 import 'font-awesome/css/font-awesome.min.css';
-import Sidebar from '../components/Sidebar'; // Import Sidebar
+import Sidebar from '../components/Sidebar'; 
 
 // Constants
-const TOTAL_PAGES = 15; // Total number of questionnaire pages
+const TOTAL_PAGES = 15;
 const QUESTION_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 
-// Modal component
 const Modal = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-white rounded-lg p-4 shadow-lg max-w-lg w-full">
@@ -35,7 +33,7 @@ function Questionnaire() {
   const [unitKerja, setUnitKerja] = useState(null);
   const [fileUrl, setFileUrl] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for sidebar
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
   const [summaryContent, setSummaryContent] = useState('');
 
   // Fetch unit kerja for logged-in user
@@ -43,14 +41,12 @@ function Questionnaire() {
     const fetchUnitKerja = async () => {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) return console.error(userError || 'User not found');
-
       const { data, error } = await supabase
         .schema('simbatik')
         .from('unit_kerja')
         .select('unit_kerja')
         .eq('user_id', user.id)
         .single();
-
       if (error) console.error('Error fetching unit kerja:', error);
       else setUnitKerja(data?.unit_kerja || '');
     };
@@ -64,7 +60,6 @@ function Questionnaire() {
         .schema('simbatik')
         .from('level')
         .select('id, level_nama, level_penjelasan');
-
       if (levelError) console.error('Error fetching levels:', levelError);
       else setLevels(levelData || []);
     };
@@ -81,55 +76,60 @@ function Questionnaire() {
         .select('*')
         .eq('id', questionId)
         .single();
-
       if (questionError) console.error('Error fetching question:', questionError);
       else setCurrentQuestion(questionData || null);
     };
     fetchQuestion();
   }, [currentPage]);
 
-  const handleLevelClick = (levelId) => {
+  // Handle Level Selection
+  const handleLevelClick = async (levelId) => {
     setSelectedLevel(levelId);
+    await insertOrUpdateData(levelId, content, fileUrl);
   };
 
-  const handleContentChange = (value) => {
+  // Handle Content Change
+  const handleContentChange = async (value) => {
     setContent(value);
+    await insertOrUpdateData(selectedLevel, value, fileUrl);
   };
 
-  // Function to handle final save
-  const handleFinalSave = async () => {
-    if (!selectedLevel || !content.trim()) {
-      alert('Silakan pilih level dan isi penjelasan sebelum menyimpan.');
-      return;
-    }
+  // Handle File Upload
+  const handleFileUpload = async (url) => {
+    setFileUrl(url);
+    await insertOrUpdateData(selectedLevel, content, url);
+  };
 
+  // Insert or Update Data in 'penilaian' table
+  const insertOrUpdateData = async (levelId, content, fileUrl) => {
     try {
-      const { error } = await supabase
+      const { data: penilaianData } = await supabase
         .schema('simbatik')
-        .from('penilaian')
-        .insert([{
-          user_id: (await supabase.auth.getUser()).data.user.id,
-          level_id: selectedLevel,
-          question_id: QUESTION_IDS[currentPage - 1],
-          penjelasan: content,
-          file_url: fileUrl || '',
-        }]);
+        .from('penilaian2')
+        .select('*')
+        .eq('user_id', (await supabase.auth.getUser()).data.user.id)
+        .eq('indikator_id', QUESTION_IDS[currentPage - 1])
+        .single();
 
-      if (error) {
-        console.error('Error saving final data:', error);
-        alert('Terjadi kesalahan saat menyimpan data final.');
+      if (penilaianData) {
+        // Update existing data
+        const { error } = await supabase
+          .schema('simbatik')
+          .from('penilaian2')
+          .update({ level_id: levelId, penjelasan: content, file_url: fileUrl })
+          .eq('user_id', penilaianData.user_id)
+          .eq('indikator_id', penilaianData.indikator_id);
+        if (error) console.error('Error updating data:', error);
       } else {
-        alert('Data final berhasil disimpan!');
-        // Reset states
-        setSelectedLevel(null);
-        setContent('');
-        setCurrentPage(1);
-        setFileUrl('');
-        setIsModalOpen(false); // Close modal on successful save
+        // Insert new data
+        const { error } = await supabase
+          .schema('simbatik')
+          .from('penilaian2')
+          .insert([{ user_id: (await supabase.auth.getUser()).data.user.id, level_id: levelId, indikator_id: QUESTION_IDS[currentPage - 1], penjelasan: content, file_url: fileUrl }]);
+        if (error) console.error('Error inserting data:', error);
       }
     } catch (error) {
-      console.error('Error:', error);
-      alert('Terjadi kesalahan saat menyimpan data final.');
+      console.error('Error in insertOrUpdateData:', error);
     }
   };
 
@@ -152,9 +152,39 @@ const handleLightbulbClick = () => {
     setIsSidebarOpen(prev => !prev);
   };
 
-  // Removed unused scrollToQuestion function
-  
+  // Preselect data from DB if it exists
+  useEffect(() => {
+    const fetchPenilaianData = async () => {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) return console.error(userError || 'User not found');
+      const userId = user ? user.id : null;
 
+      const { data: penilaianData, error: penilaianError } = await supabase
+        .schema('simbatik')
+        .from('penilaian2')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('indikator_id', currentQuestion?.id)
+        .single();
+
+      if (penilaianError) {
+        console.error('Error fetching penilaian data:', penilaianError)
+        setSelectedLevel(null);
+        setContent('');
+        setFileUrl('');
+      }
+      else {
+        if (penilaianData) {
+          setSelectedLevel(penilaianData.level_id || null);
+          setContent(penilaianData.penjelasan || '');
+          setFileUrl(penilaianData.file_url || '');
+        }
+      }
+    };
+    fetchPenilaianData();
+  }, [currentQuestion]);
+
+  
   return (
     <div className="p-6 max-w-4xl mx-auto rounded-lg">
       <h1 className="text-xl font-bold mb-4">PENILAIAN MANDIRI</h1>
@@ -162,16 +192,14 @@ const handleLightbulbClick = () => {
 
       <div className="flex justify-between items-center mb-6">
         <div>
-        <button onClick={toggleSidebar} className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded mr-2">
-  <i className="fa fa-ellipsis-v text-white cursor-pointer"></i> RINGKASAN
-</button>
+          <button onClick={toggleSidebar} className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded mr-2">
+            <i className="fa fa-ellipsis-v text-white cursor-pointer"></i> RINGKASAN
+          </button>
 
-          <button onClick={handleFinalSave} className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded">
-            FINAL
+          <button onClick={insertOrUpdateData} className="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded">
+            SIMPAN
           </button>
         </div>
-
-
 
         {/* Pagination Controls */}
         <div className="flex">
@@ -188,7 +216,7 @@ const handleLightbulbClick = () => {
         {currentQuestion && (
           <>
             <div className="flex items-center">
-              <h2 className="text-lg font-semibold mb-2">Indikator {currentQuestion.indikator_id}</h2>
+              <h2 className="text-lg font-semibold mb-2">Indikator {currentQuestion.indikator_nama}</h2>
               <svg 
                 onClick={handleLightbulbClick} // Trigger modal on click
                 xmlns="http://www.w3.org/2000/svg" 
@@ -207,44 +235,42 @@ const handleLightbulbClick = () => {
         {/* Render other elements for each question page */}
       </div>
 
-       {/* Levels Section */}
-       <div className="space-y-2">
-          {levels.length > 0 && levels.map((level) => (
-            <div className="p-4 border rounded-lg" key={level.id}>
-              <div onClick={() => handleLevelClick(level.id)} className={`p-4 border rounded-lg cursor-pointer transition ${selectedLevel === level.id ? 'bg-teal-600 text-white' : 'bg-white'} hover:bg-teal-600 hover:text-white`}>
-                <h3 className="font-semibold">{level.level_nama}</h3>
-                <p className="text-gray-600">{level.level_penjelasan}</p>
-              </div>
+      {/* Levels Section */}
+      <div className="space-y-2">
+        {levels.length > 0 && levels.map((level) => (
+          <div className="p-4 border rounded-lg" key={level.id}>
+            <div 
+              onClick={() => handleLevelClick(level.id)} 
+              className={`p-4 border rounded-lg cursor-pointer transition 
+              ${selectedLevel === level.id ? 'bg-teal-600 text-white' : 'bg-white'} 
+              hover:bg-teal-600 hover:text-white`}>
+              <h3 className="font-semibold">{level.level_nama}</h3>
+              <p className="text-gray-600">{level.level_penjelasan}</p>
             </div>
-          ))}
-        </div>
-
-      {/* Render Editor */}
-      <div className="border rounded mb-4 p-4">
-        <ReactQuill value={content} onChange={handleContentChange} />
+          </div>
+        ))}
       </div>
 
-     
+      {/* Render Editor */}
+      <div className="border rounded mb-4 p-4" style={{height: '300px'}}>
+        <ReactQuill value={content} onChange={handleContentChange} style={{height: '200px'}}/>
+      </div>
 
       {/* File Uploader */}
-                   <FileUploader onFileUpload={setFileUrl} /> 
+      {/* <FileUploader onFileUpload={setFileUrl} /> */}
 
       {/* Render Summary Modal */}
-   
-    <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-  <div className="bg-white max-w-md max-h-96 overflow-y-auto p-4 rounded-lg shadow-lg">
-    <h2 className="text-lg font-semibold mb-2">Informasi Indikator</h2>
-    <pre className="whitespace-pre-wrap">{summaryContent}</pre>
-  </div>
-</Modal>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <div className="bg-white max-w-md max-h-96 overflow-y-auto p-4 rounded-lg shadow-lg">
+          <h2 className="text-lg font-semibold mb-2">Informasi Indikator</h2>
+          <pre className="whitespace-pre-wrap">{summaryContent}</pre>
+        </div>
+      </Modal>
 
-    {/* Render Sidebar */}
-    <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} content={summaryContent} />
-  </div>
+      {/* Render Sidebar */}
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} content={summaryContent} />
+    </div>
   );
 }
 
 export default Questionnaire;
-
-
-
