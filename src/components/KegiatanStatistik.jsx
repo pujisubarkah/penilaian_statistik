@@ -98,7 +98,7 @@ function KegiatanStatistik() {
     <div className="bg-white shadow-md p-4 md:col-span-2">
       <h2 className="text-lg font-semibold mb-4">Kegiatan Statistik</h2>
       <div className="mb-4 p-2 bg-gray-100 rounded-md">
-        <strong>Total Skor: </strong>{totalScore}
+        <strong>Nilai IPS Produsen Data: {totalScore}</strong>
       </div>
       <table className="min-w-full bg-white">
         <thead>
