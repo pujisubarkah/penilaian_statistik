@@ -2,11 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 
-function Sidebar({ isOpen, setCurrentPage }) {
+function Sidebar({ isOpen, onMenuClick }) {
     const [questions, setQuestions] = useState([]);
-    const handleQuestionClick = (questionId) => {
-        setCurrentPage(questionId);
-    };
 
     useEffect(() => {
         const fetchQuestions = async () => {
@@ -64,10 +61,10 @@ function Sidebar({ isOpen, setCurrentPage }) {
 
             <ul className="space-y-2">
                 {questions.map((question) => (
-                    <li key={question.id} className="flex items-center justify-between">
+                    <li key={question.id} onClick={() => onMenuClick(question.indikator_id)} className="flex items-center justify-between">
                         <span
                             className={`text-sm cursor-pointer ${question.completed ? 'text-teal-600' : 'text-gray-500'}`}
-                            onClick={() => handleQuestionClick(question.id)}
+                            
                         >
                             {question.text}
                         </span>
