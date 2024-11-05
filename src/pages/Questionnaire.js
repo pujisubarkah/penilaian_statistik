@@ -287,7 +287,7 @@ const handleLightbulbClick = () => {
       <div>
       <div className="border rounded mb-4 p-4" style={{height: '150px'}}>
         <h3 className="font-semibold"> Link Bukti Dukung</h3>
-        <p className="text-gray-600"> Input link file yang mendukung penilaian Anda yang telah diunggah pada Google Drive</p>
+        <p className="text-gray-600"> Input link file yang mendukung penilaian Anda yang telah diunggah pada <b><a className="text-teal-700" href="https://drive.google.com/drive/folders/1SjE5izKM6QQsax9tIL6QhaiM-oEM8O9Q?usp=drive_link" target="_blank">Folder Google Drive Bukti Dukung</a></b></p>
         <input 
             type="text" 
             className="border rounded w-full p-2 mt-2" 
@@ -295,7 +295,7 @@ const handleLightbulbClick = () => {
             value={fileUrl}
             onChange={(e) => handleFileUrl(e.target.value)}
           />
-        <a href={fileUrl} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">Lihat File</a>
+        <a href={fileUrl} target="_blank" rel="noreferrer" className="text-teal-700 hover:underline"><b>Lihat File</b></a>
       </div>
       {/* Komponen lainnya
       <FileUploader indikatorId={QUESTION_IDS[currentPage - 1]} setFileUrl={url => {
