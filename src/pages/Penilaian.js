@@ -26,7 +26,8 @@ function Penilaian() {
       const { data, error } = await supabase
         .schema("simbatik")
         .from("kegiatan")
-        .select("*");
+        .select("*")
+        .eq("user_id", (await supabase.auth.getUser()).data.user.id);
 
       if (error) {
         console.error("Error fetching kegiatan:", error);
