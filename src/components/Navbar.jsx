@@ -13,7 +13,6 @@ function Navbar() {
   const menu = [
       { name: 'Beranda', path: '/' },
       { name: 'EPSS LAN', path: '/EPSS' },
-      { name: 'Bantuan', path: '/Bantuan' },
 
     ...(user ? [{ name: 'Penilaian Mandiri', path: '/Penilaian' }] : [])
   ];
