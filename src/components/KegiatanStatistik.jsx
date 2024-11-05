@@ -103,7 +103,7 @@ function KegiatanStatistik() {
       <table className="min-w-full bg-white">
         <thead>
           <tr>
-            <th className="py-2 px-4 border-b text-center">Domain / Indikator</th>
+            <th className="py-2 px-4 border-b">Domain / Indikator</th>
             <th className="py-2 px-4 border-b text-center" >Bobot</th>
             <th className="py-2 px-4 border-b text-center">Nilai Produsen Data</th>
             <th className="py-2 px-4 border-b text-center">Nilai Wali Data</th>
@@ -115,7 +115,7 @@ function KegiatanStatistik() {
             .map((domain, index) => (
               <React.Fragment key={index}>
                 <tr onClick={() => handleDomainClick(domain)} className="cursor-pointer hover:bg-gray-100 font-bold">
-                  <td className="py-2 px-4 border-b text-center">
+                  <td className="py-2 px-4 border-b">
                     {`${indikators[domain].domain_id}. ${indikators[domain].domain_nama}`}
                   </td>
                   <td className="py-2 px-4 border-b text-center">{indikators[domain].domain_bobot}</td>
@@ -126,7 +126,7 @@ function KegiatanStatistik() {
                   .sort((a, b) => a.indikator_id - b.indikator_id)
                   .map((ind, indIndex) => (
                     <tr key={indIndex} className="hover:bg-gray-100">
-                      <td className="py-2 px-4 border-b pl-6 text-center">
+                      <td className="py-2 px-4 border-b pl-6">
                         {`${ind.indikator_id}. ${ind.indikator_nama || ind.name}`}
                       </td>
                       <td className="py-2 px-4 border-b text-center">{ind.indikator_bobot}</td>
