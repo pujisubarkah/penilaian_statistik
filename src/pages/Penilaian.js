@@ -342,6 +342,7 @@ function Penilaian() {
           </div>
 
           <div className="bg-teal-700 text-white p-4 rounded-md shadow-md md:col-span-1">
+            <h2 className="text-lg font-semibold mb-4">PROGRES PENILAIAN MANDIRI</h2>
         <div className="text-4xl font-semibold">{completedIndicators}/{totalIndicators}</div>
         <div>Indikator sudah dilengkapi</div>
         <div className="my-2 w-full bg-gray-300 h-2 rounded">
