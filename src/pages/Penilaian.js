@@ -4,6 +4,7 @@ import { supabase } from '../supabaseClient';
 import Radar from '../components/Radar';
 import KegiatanStatistik from '../components/KegiatanStatistik';
 import Footer from '../components/Footer';
+import { motion } from 'framer-motion';
 
 function Penilaian() {
   const navigate = useNavigate();
@@ -183,6 +184,24 @@ function Penilaian() {
     setShowForm(true);
   };
 
+   const ScrollingText = ({ text }) => {
+    return (
+      <motion.div
+        className="whitespace-nowrap" // Pastikan teks tidak terputus di beberapa baris
+        initial={{ x: '100%' }} // Mulai dari luar layar di kanan
+        animate={{ x: '-100%' }} // Bergerak ke luar layar di kiri
+        transition={{
+          duration: 20, // Durasi pergerakan
+          repeat: Infinity, // Ulang terus menerus
+          ease: 'linear', // Pergerakan linier
+        }}
+      >
+        {text}
+      </motion.div>
+    );
+  };
+
+
   return (
     <>
       <div
@@ -200,10 +219,10 @@ function Penilaian() {
 
       <div className="container mx-auto p-6">
         <h1 className="text-2xl font-bold mb-4">PENILAIAN MANDIRI</h1>
-        <p className="text-left text-md text-gray-700">Penilaian Mandiri Lembaga Administrasi Negara</p>
+        <ScrollingText text="Penilaian Mandiri Statistik Sektoral Unit Kerja di Lingkungan Lembaga Administrasi Negara" className="text-red-500 font-poppins text-lg" />
 
         <div className={`p-4 rounded-md text-white mt-4 ${completedIndicators === totalIndicators ? 'bg-teal-600' : 'bg-teal-600'}`}>
-          {completedIndicators === totalIndicators ? 'Pengisian sudah selesai' : 'Pengisian belum selesai'}
+          {completedIndicators === totalIndicators ? 'Terima Kasih telah Mengisi Penilaian Statistik Sektoral' : 'Pengisian belum selesai'}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
