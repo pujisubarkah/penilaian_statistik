@@ -11,9 +11,11 @@ function Navbar() {
   const [user, setUser] = useState(null); // State to store user information
 
   const menu = [
-    { name: 'Beranda', path: '/' },
-    { name: 'EPSS LAN', path: '/EPSS' },
-    { name: 'Penilaian Mandiri', path: '/Penilaian' }
+      { name: 'Beranda', path: '/' },
+      { name: 'EPSS LAN', path: '/EPSS' },
+      { name: 'Bantuan', path: '/Bantuan' },
+
+    ...(user ? [{ name: 'Penilaian Mandiri', path: '/Penilaian' }] : [])
   ];
 
   const openModal = () => setModalOpen(true);
