@@ -76,8 +76,8 @@ const Radar = () => {
       key={index}
       className="absolute text-base font-semibold text-white bg-black bg-opacity-70 rounded px-2 py-1 z-10" // Mengubah text-sm menjadi text-base dan menambahkan z-10
       style={{
-        top: `${50 - Math.cos((index * 2 * Math.PI) / Object.keys(scores).length) * 50}%`, // Menaikkan posisi label
-        left: `${50 + Math.sin((index * 2 * Math.PI) / Object.keys(scores).length) * 50}%`, // Menaikkan posisi label
+        top: `${50 - Math.cos((index * 2 * Math.PI) / Object.keys(scores).length) * 30}%`, // Menaikkan posisi label
+        left: `${50 + Math.sin((index * 2 * Math.PI) / Object.keys(scores).length) * 30}%`, // Menaikkan posisi label
         transform: 'translate(-50%, -50%)', // Memusatkan label
       }}
     >
