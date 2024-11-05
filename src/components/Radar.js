@@ -65,25 +65,26 @@ const Radar = () => {
   }, []);
 
   return (
-    <div className="relative w-[300px] h-[300px] mx-auto">
+    <div className="relative w-[300px] h-[300px] mx-auto ml-20">
       {/* Chart Radar */}
       <RadarChart captions={captions} data={chartData} size={300} />
 
-      {/* Menampilkan nilai setiap titik di sekitar radar chart */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        {Object.keys(scores).map((domain, index) => (
-          <div
-            key={index}
-            className="absolute text-xs font-semibold text-gray-800"
-            style={{
-              top: `${50 - Math.cos((index * 2 * Math.PI) / Object.keys(scores).length) * 40}%`,
-              left: `${50 + Math.sin((index * 2 * Math.PI) / Object.keys(scores).length) * 40}%`,
-            }}
-          >
-            {scores[domain]}
-          </div>
-        ))}
-      </div>
+     {/* Menampilkan nilai setiap titik di sekitar radar chart */}
+<div className="absolute inset-0 flex items-center justify-center">
+  {Object.keys(scores).map((domain, index) => (
+    <div
+      key={index}
+      className="absolute text-base font-semibold text-white bg-black bg-opacity-70 rounded px-2 py-1 z-10" // Mengubah text-sm menjadi text-base dan menambahkan z-10
+      style={{
+        top: `${50 - Math.cos((index * 2 * Math.PI) / Object.keys(scores).length) * 50}%`, // Menaikkan posisi label
+        left: `${50 + Math.sin((index * 2 * Math.PI) / Object.keys(scores).length) * 50}%`, // Menaikkan posisi label
+        transform: 'translate(-50%, -50%)', // Memusatkan label
+      }}
+    >
+      {scores[domain]}
+    </div>
+  ))}
+</div>
     </div>
   );
 };
