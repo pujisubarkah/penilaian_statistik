@@ -82,6 +82,11 @@ function Questionnaire() {
     fetchQuestion();
   }, [currentPage]);
 
+  // Fungsi untuk memperbarui halaman saat item di Sidebar diklik
+    const handleMenuClick = (pageId) => {
+      setCurrentPage(pageId);
+    };
+
   // Handle Level Selection
   const handleLevelClick = async (levelId) => {
     setSelectedLevel(levelId);
@@ -322,7 +327,7 @@ const handleLightbulbClick = () => {
 
       {/* Render Sidebar */}
       <Sidebar isOpen={isSidebarOpen}
-       setCurrentPage={(id) => setCurrentPage(QUESTION_IDS.indexOf(id) + 1)}
+       onMenuClick={handleMenuClick}
        onClose={() => setIsSidebarOpen(false)} content={summaryContent} />
     </div>
   );
