@@ -119,7 +119,7 @@ function KegiatanStatistik() {
                     {`${indikators[domain].domain_id}. ${indikators[domain].domain_nama}`}
                   </td>
                   <td className="py-2 px-4 border-b text-center">{indikators[domain].domain_bobot}</td>
-                  <td className="py-2 px-4 border-b text-center">{indikators[domain].indicatorSum}</td>
+                  <td className="py-2 px-4 border-b text-center">{(indikators[domain].indicatorSum).toFixed(2)}</td>
                   <td className="py-2 px-4 border-b text-center"></td>
                 </tr>
                 {activeDomain === domain && indikators[domain].indicators
