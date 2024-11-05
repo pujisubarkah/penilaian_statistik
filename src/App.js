@@ -7,6 +7,7 @@ import EPSS from './pages/EPSS';
 import Penilaian from './pages/Penilaian';
 import Questionnaire from './pages/Questionnaire'; // Import the Questionnaire page
 import LoadingSpinner from './components/LoadingSpinner'; // Loading icon component
+import Chatbot from './components/Chatbot';
 
 function App() {
   const [isLoading, setIsLoading] = useState(false);
@@ -33,6 +34,7 @@ function App() {
         <Route path="/Penilaian" element={<Penilaian />} />
         <Route path="/Questionnaire" element={<Questionnaire />} /> {/* Add Questionnaire route */}
       </Routes>
+  <Chatbot />
     </div>
   );
 }
