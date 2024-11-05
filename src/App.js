@@ -5,36 +5,70 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import EPSS from './pages/EPSS';
 import Penilaian from './pages/Penilaian';
-import Questionnaire from './pages/Questionnaire'; // Import the Questionnaire page
-import LoadingSpinner from './components/LoadingSpinner'; // Loading icon component
-import Chatbot from './components/Chatbot';
+import Questionnaire from './pages/Questionnaire';
+import LoadingSpinner from './components/LoadingSpinner';
+import Chatbot from "react-chatbot-kit";
+import "react-chatbot-kit/build/main.css";
+import config from "./chatbot/config";
+import MessageParser from "./chatbot/MessageParser";
+import ActionProvider from "./chatbot/ActionProvider";
 
 function App() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isChatbotOpen, setIsChatbotOpen] = useState(true); // State to control chatbot visibility
   const location = useLocation();
 
   useEffect(() => {
-    // Show loading spinner on route change
     setIsLoading(true);
-    const timer = setTimeout(() => setIsLoading(false), 500); // Adjust time as needed
+    const timer = setTimeout(() => setIsLoading(false), 500);
 
-    return () => clearTimeout(timer); // Clean up on unmount
+    return () => clearTimeout(timer);
   }, [location]);
 
-  return (
-    <div>
-      <Navbar />
+  const toggleChatbot = () => {
+    setIsChatbotOpen(!isChatbotOpen);
+  };
 
-      {/* Display LoadingSpinner if loading */}
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
       {isLoading && <LoadingSpinner />}
 
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/EPSS" element={<EPSS />} />
         <Route path="/Penilaian" element={<Penilaian />} />
-        <Route path="/Questionnaire" element={<Questionnaire />} /> {/* Add Questionnaire route */}
+        <Route path="/Questionnaire" element={<Questionnaire />} />
       </Routes>
-  <Chatbot />
+
+      {/* Chatbot positioned fixed at the bottom right */}
+      {isChatbotOpen && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <div className="relative">
+            <Chatbot 
+              config={config}
+              messageParser={MessageParser}
+              actionProvider={ActionProvider}
+            />
+            <button 
+              onClick={toggleChatbot} 
+              className="absolute top-0 right-0 p-2 text-white bg-red-500 rounded-full"
+            >
+              X
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {/* Button to open the chatbot again if closed */}
+      {!isChatbotOpen && (
+        <button 
+          onClick={toggleChatbot} 
+          className="fixed bottom-4 right-4 z-50 p-2 text-white bg-teal-500 rounded-full"
+        >
+          Bot
+        </button>
+      )}
     </div>
   );
 }
