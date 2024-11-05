@@ -32,7 +32,7 @@ function Sidebar({ isOpen, setCurrentPage }) {
                 .select(`
                     id,
                     indikator_nama,
-                    penilaian2:penilaian2(indikator_id, status)
+                    penilaian2:penilaian2(indikator_id, level_id, file_url, penjelasan)
                 `)
                 .eq('penilaian2.user_id', userId)
                 .order('id', { ascending: true });
@@ -45,7 +45,9 @@ function Sidebar({ isOpen, setCurrentPage }) {
             const formattedData = data.map(question => ({
                 indikator_id: question.id,
                 text: question.indikator_nama,
-                completed: question.penilaian2.length > 0 && question.penilaian2[0].status === 'final',
+                completed: question.penilaian2.length > 0 
+                && question.penilaian2[0].file_url !== null && question.penilaian2[0].file_url !== '' 
+                && question.penilaian2[0].penjelasan !== null && question.penilaian2[0].penjelasan !== '',
             }));
 
             setQuestions(formattedData);
