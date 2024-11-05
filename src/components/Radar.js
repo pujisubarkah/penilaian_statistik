@@ -1,26 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import RadarChart from 'react-svg-radar-chart';
 import 'react-svg-radar-chart/build/css/index.css';
-import { supabase } from '../supabaseClient'; // Adjust based on your Supabase client setup
+import { supabase } from '../supabaseClient'; // Sesuaikan dengan konfigurasi Supabase Anda
 
 const Radar = () => {
   const [chartData, setChartData] = useState([]);
   const [captions, setCaptions] = useState({});
+  const [scores, setScores] = useState({});
 
   useEffect(() => {
     const fetchChartData = async () => {
-      // Get the logged-in user's ID
       const { data: userData, error: userError } = await supabase.auth.getUser();
       if (userError) {
         console.error('Error fetching user:', userError);
         return;
       }
       const userId = userData?.user?.id;
-      console.log('User ID:', userId); // Check user ID
+      console.log('User ID:', userId);
 
-      // Fetch penilaian_domain data for the logged-in user
       const { data, error } = await supabase
-        .schema('simbatik') // Ensure this schema is correct
+        .schema('simbatik') // Pastikan schema benar
         .from('penilaian_domain')
         .select('*')
         .eq('user_id', userId);
@@ -30,17 +29,15 @@ const Radar = () => {
         return;
       }
 
-      console.log('Fetched Data:', data); // Check fetched data
-
       if (!data || data.length === 0) {
         console.error('No data found for the user');
         return;
       }
 
+      // Menyiapkan data dan skor untuk radar chart
       const radarData = [
         {
           data: data.reduce((acc, item) => {
-            // Scale score to be between 0 and 2
             acc[item.domain_nama] = Math.min(item.total_domain_skor * 100 / (item.domain_bobot * 5), 2);
             return acc;
           }, {}),
@@ -48,23 +45,45 @@ const Radar = () => {
         },
       ];
 
-      // Set captions using domain_nama
       const chartCaptions = data.reduce((acc, item) => {
         acc[item.domain_nama] = item.domain_nama;
         return acc;
       }, {});
 
+      // Menyimpan nilai asli untuk ditampilkan sebagai label
+      const dataScores = data.reduce((acc, item) => {
+        acc[item.domain_nama] = item.total_domain_skor;
+        return acc;
+      }, {});
+
       setChartData(radarData);
       setCaptions(chartCaptions);
+      setScores(dataScores);
     };
 
     fetchChartData();
   }, []);
 
   return (
-    <div>
-      {/* Adjust chart size to 300 for smaller display */}
+    <div className="relative w-[300px] h-[300px] mx-auto">
+      {/* Chart Radar */}
       <RadarChart captions={captions} data={chartData} size={300} />
+
+      {/* Menampilkan nilai setiap titik di sekitar radar chart */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        {Object.keys(scores).map((domain, index) => (
+          <div
+            key={index}
+            className="absolute text-xs font-semibold text-gray-800"
+            style={{
+              top: `${50 - Math.cos((index * 2 * Math.PI) / Object.keys(scores).length) * 40}%`,
+              left: `${50 + Math.sin((index * 2 * Math.PI) / Object.keys(scores).length) * 40}%`,
+            }}
+          >
+            {scores[domain]}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
