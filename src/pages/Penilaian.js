@@ -363,10 +363,10 @@ function Penilaian() {
           </div>
 
           <div className="flex flex-col md:flex-row gap-4 mt-4">
-  <div className="flex-grow"> {/* This will take the remaining width */}
+  <div className="w-3/4"> {/* Lebar KegiatanStatistik 2/3 */}
     <KegiatanStatistik />
   </div>
-  <div className="w-1/3"> {/* Set a fixed width for Radar */}
+  <div className="w-1/4"> {/* Lebar Radar 1/3 */}
     <Radar />
   </div>
 </div>
