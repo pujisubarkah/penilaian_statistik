@@ -12,22 +12,49 @@ import "react-chatbot-kit/build/main.css";
 import config from "./chatbot/config";
 import MessageParser from "./chatbot/MessageParser";
 import ActionProvider from "./chatbot/ActionProvider";
+import { supabase } from './supabaseClient'; // Pastikan untuk mengimpor supabase
 
 function App() {
   const [isLoading, setIsLoading] = useState(false);
-  const [isChatbotOpen, setIsChatbotOpen] = useState(true); // State to control chatbot visibility
+  const [isChatbotOpen, setIsChatbotOpen] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Menyimpan status login
   const location = useLocation();
+
+  useEffect(() => {
+    // Mengecek status login pengguna dengan Supabase
+    const checkUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data) {
+        setIsLoggedIn(true);  // Pengguna sudah login
+      } else {
+        setIsLoggedIn(false); // Pengguna belum login
+      }
+    };
+
+    checkUser(); // Panggil fungsi cek login
+  }, []);
 
   useEffect(() => {
     setIsLoading(true);
     const timer = setTimeout(() => setIsLoading(false), 500);
-
     return () => clearTimeout(timer);
   }, [location]);
 
   const toggleChatbot = () => {
     setIsChatbotOpen(!isChatbotOpen);
   };
+
+  // Using useEffect to call greetUser after component is mounted
+  const actionProviderRef = React.useRef(null);
+
+  useEffect(() => {
+    if (actionProviderRef.current) {
+      actionProviderRef.current.greetUser(); // Call greetUser after mount
+    }
+  }, []);
+
+  // Cek apakah lokasi saat ini adalah halaman Penilaian atau Questionnaire
+  const isChatbotPage = location.pathname === '/Penilaian' || location.pathname === '/questionnaire';
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -41,27 +68,28 @@ function App() {
         <Route path="/Questionnaire" element={<Questionnaire />} />
       </Routes>
 
-      {/* Chatbot positioned fixed at the bottom right */}
-      {isChatbotOpen && (
+      {/* Tampilkan chatbot hanya jika pengguna sudah login dan berada di halaman Penilaian atau Questionnaire */}
+      {isLoggedIn && isChatbotPage && isChatbotOpen && (
         <div className="fixed bottom-4 right-4 z-50">
           <div className="relative">
             <Chatbot 
               config={config}
               messageParser={MessageParser}
               actionProvider={ActionProvider}
+              ref={actionProviderRef} // Pass ref to actionProvider
             />
             <button 
               onClick={toggleChatbot} 
-              className="absolute top-0 right-0 p-2 text-white bg-red-500 rounded-full"
+              className="absolute top-0 right-0 p-2 text-white bg-teal-500 rounded"
             >
-              X
+              ▼
             </button>
           </div>
         </div>
       )}
-      
-      {/* Button to open the chatbot again if closed */}
-      {!isChatbotOpen && (
+
+      {/* Button untuk membuka chatbot jika ditutup, hanya di halaman Penilaian atau Questionnaire */}
+      {!isChatbotOpen && isLoggedIn && isChatbotPage && (
         <button 
           onClick={toggleChatbot} 
           className="fixed bottom-4 right-4 z-50 p-2 text-white bg-teal-500 rounded-full"
