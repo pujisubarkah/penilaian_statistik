@@ -29,7 +29,7 @@ const Carousel = () => {
         }, 3000); // Change slide every 3 seconds
 
         return () => clearInterval(interval); // Cleanup interval on component unmount
-    }, []);
+    }, [nextSlide]);
 
     return (
         <div className="flex flex-col items-center justify-center bg-darkred p-5 rounded-lg shadow-lg overflow-hidden">

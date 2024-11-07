@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 function Penilaian() {
   const navigate = useNavigate();
   const [indikators, setIndikators] = useState({});
-  const [activeDomain, setActiveDomain] = useState(null);
+  // const [activeDomain, setActiveDomain] = useState(null);
   const [totalIndicators, setTotalIndicators] = useState(0);
   const [completedIndicators, setCompletedIndicators] = useState(0);
   const [ipsValue, setIpsValue] = useState(null);

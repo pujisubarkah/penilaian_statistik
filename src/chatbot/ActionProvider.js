@@ -1,12 +1,52 @@
-// ActionProvider.js
 import { supabase } from '../supabaseClient';
 
 class ActionProvider {
   constructor(createChatBotMessage, setStateFunc) {
     this.createChatBotMessage = createChatBotMessage;
     this.setState = setStateFunc;
-    this.missedCount = 0; // Menambahkan missedCount untuk kontrol
+    this.missedCount = 0;
+    this.currentStep = 0;
+    this.steps = [
+      "Langkah Pertama : Isikan Tambah Kegiatan Statistik, isikan kegiatan statistik di Unit Kerja Anda",
+      "ok, kemudian pilih Lihat Isian, tombol yang berwarna hijau, Anda akan melihat halaman Penilaian Mandiri",
+      "Sudah, isikan indikator yang sesuai dengan kondisi Unit Kerja Anda sesuai levelnya, masih Rintisan atau Optimum, isi penjelasannya sampai dengan upload bukti dukung yah",
+      "ada 15 pernyataan, klik bohlamnya untuk melihat seperti apa indikatornya",
+      "setelah selesai kembali ke ruang penilaian mandiri, Anda akan melihat hasilnya",
+      "Selamat Anda mendapatkan skor penilaian mandiri statistik sektoral"
+    ];
   }
+
+  // Handle step-by-step guide with delay using setTimeout and user input trigger
+  handleStepByStep = () => {
+    console.log("Current Step:", this.currentStep);
+    if (this.currentStep < this.steps.length) {
+      const stepMessage = this.createChatBotMessage(this.steps[this.currentStep]);
+
+      // Add a delay before sending the message
+      setTimeout(() => {
+        this.updateChatbotState(stepMessage);
+        this.currentStep++; // Move to the next step
+      }, 5000);
+    } else {
+      const endMessage = this.createChatBotMessage("Anda telah menyelesaikan semua langkah. Jika butuh bantuan lebih lanjut, beri tahu saya!");
+      this.updateChatbotState(endMessage);
+      this.currentStep = 0; // Reset for future use
+    }
+  };
+
+  // Trigger next step when user types "sudah"
+  handleUserInput = (input) => {
+    if (input.toLowerCase().includes("sudah")) {
+      this.handleStepByStep();
+    } else {
+      const message = this.createChatBotMessage("Tunggu sebentar, saya akan melanjutkan ke langkah berikutnya.");
+      this.updateChatbotState(message);
+    }
+  };
+
+  handleNextStep = () => {
+    this.handleStepByStep();
+  };
 
   greetUser = () => {
     const currentHour = new Date().getHours();
@@ -30,63 +70,50 @@ class ActionProvider {
     this.updateChatbotState(message);
   };
 
-  // Default response jika tidak ada kecocokan
   handleDefaultResponse = () => {
     const message = this.createChatBotMessage("Saya disini untuk membantu soal statistik sektoral di LAN.");
     this.updateChatbotState(message);
   };
 
-  // Fungsi untuk mengecek apakah pertanyaan memerlukan jawaban dari Supabase
   isQuestionForSupabase = (question) => {
-    // Tentukan kata kunci yang menunjukkan bahwa pertanyaan mengarah ke Supabase
     const keywords = ['statistik', 'data', 'faq', 'pertanyaan'];
     return keywords.some(keyword => question.toLowerCase().includes(keyword));
-  }
+  };
 
-  // Fungsi untuk menangani pertanyaan yang mengarah ke Supabase
   handleQuestionFromSupabase = async (question) => {
-    // Cek apakah pertanyaan memerlukan pencarian di Supabase
     if (this.isQuestionForSupabase(question)) {
       const { data, error } = await supabase
-        .schema("simbatik")
-        .from('faq')  // Ganti dengan nama tabel yang sesuai
+        .from('faq')
         .select('jawaban')
-        .ilike('pertanyaan', `%${question}%`);  // Mencocokkan pertanyaan dari input pengguna
+        .ilike('pertanyaan', `%${question}%`);
 
       if (error) {
         console.error("Error fetching data:", error);
         const message = this.createChatBotMessage("Terjadi kesalahan saat mencoba menjawab pertanyaan Anda. Coba lagi nanti.");
         this.updateChatbotState(message);
       } else if (data.length > 0) {
-        // Jika ditemukan jawaban
-        this.missedCount = 0; // Reset missedCount jika ditemukan jawaban
+        this.missedCount = 0;
         const message = this.createChatBotMessage(data[0].jawaban);
         this.updateChatbotState(message);
       } else {
-        // Jika tidak ditemukan jawaban di Supabase
         this.missedCount++;
-    
-        if (this.missedCount >= 1) {
-          // Setelah dua kali atau lebih gagal menemukan jawaban, memberikan alternatif
-          const message = this.createChatBotMessage("Wah, yang ini juga belum ada nih. Bisa jadi pertanyaan Anda sangat unik. Coba tanya yang lain ya!");
-          this.updateChatbotState(message);
-          this.missedCount = 0; // Reset missedCount setelah memberikan pesan alternatif
-        } else {
-          const message = this.createChatBotMessage("Waduh, pertanyaannya belum ada di database saya nih. Coba tanya yang lain ya!");
-          this.updateChatbotState(message);
-        }
+        const message = this.createChatBotMessage(this.missedCount >= 2
+          ? "Wah, yang ini juga belum ada nih. Bisa jadi pertanyaan Anda sangat unik. Coba tanya yang lain ya!"
+          : "Waduh, pertanyaannya belum ada di database saya nih. Coba tanya yang lain ya!");
+        this.updateChatbotState(message);
+        if (this.missedCount >= 2) this.missedCount = 0;
       }
     } else {
-      // Jika pertanyaan tidak cocok, balas dengan default
       const message = this.createChatBotMessage("Saya disini untuk membantu penilaian statistik sektoral di unit kerja Anda.");
       this.updateChatbotState(message);
     }
   };
+  
 
   updateChatbotState(message) {
     this.setState((prevState) => ({
       ...prevState,
-      messages: [...prevState.messages, message],
+      messages: [...(prevState.messages || []), message],
     }));
   }
 }

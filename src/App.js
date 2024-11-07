@@ -1,6 +1,6 @@
 // src/App.js
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import EPSS from './pages/EPSS';
@@ -23,7 +23,7 @@ function App() {
   useEffect(() => {
     // Mengecek status login pengguna dengan Supabase
     const checkUser = async () => {
-      const { data, error } = await supabase.auth.getUser();
+      const { data } = await supabase.auth.getUser();
       if (data) {
         setIsLoggedIn(true);  // Pengguna sudah login
       } else {
@@ -89,13 +89,21 @@ function App() {
       )}
 
       {/* Button untuk membuka chatbot jika ditutup, hanya di halaman Penilaian atau Questionnaire */}
-      {!isChatbotOpen && isLoggedIn && isChatbotPage && (
-        <button 
-          onClick={toggleChatbot} 
-          className="fixed bottom-4 right-4 z-50 p-2 text-white bg-teal-500 rounded-full"
-        >
-          Bot
-        </button>
+{!isChatbotOpen && isLoggedIn && isChatbotPage && (
+  <button 
+    onClick={toggleChatbot} 
+    className="fixed bottom-4 right-4 z-50 p-2 bg-transparan-500 rounded-full"
+  >
+    <img 
+      src="/Eva.png"  // Make sure the path is correct
+      alt="Bot Avatar" 
+      style={{
+        width: "40px",
+        height: "40px",
+        borderRadius: "50%",
+      }}
+    />
+  </button>
       )}
     </div>
   );

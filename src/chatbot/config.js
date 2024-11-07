@@ -4,9 +4,9 @@ import ActionProvider from "./ActionProvider";
 import MessageParser from "./MessageParser";
 
 const config = {
-  botName: "AngkaMan",
+  botName: "Evalin",  
   initialMessages: [
-    createChatBotMessage("Selamat datang! Saya AngkaMan, siap membantu Anda dengan penilaian statistik sektoral di Unit Kerja Anda")
+    createChatBotMessage("Selamat datang! Saya Evalin, siap membantu Anda dengan penilaian statistik sektoral di Unit Kerja Anda. Untuk memulai, ketik 'start'.")
   ],
   actionProvider: ActionProvider,
   messageParser: MessageParser,
@@ -23,21 +23,15 @@ const config = {
   },
   customComponents: {
     botAvatar: () => (
-      <div 
+      <img 
+        src="/Eva.png"  // Make sure the path is correct and in quotes
+        alt="Bot Avatar" 
         style={{
-          backgroundColor: "#376B7E", 
-          color: "#fff", 
-          fontSize: "24px", 
-          width: "40px", 
-          height: "40px", 
-          borderRadius: "50%", 
-          display: "flex", 
-          alignItems: "center", 
-          justifyContent: "center"
+          width: "40px",
+          height: "40px",
+          borderRadius: "50%",
         }}
-      >
-        A
-      </div>
+      />
     ),
   },
 };
