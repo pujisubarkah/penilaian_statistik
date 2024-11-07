@@ -98,8 +98,8 @@ function App() {
       src="/Eva.png"  // Make sure the path is correct
       alt="Bot Avatar" 
       style={{
-        width: "40px",
-        height: "40px",
+        width: "60px",
+        height: "60px",
         borderRadius: "50%",
       }}
     />
