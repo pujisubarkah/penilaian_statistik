@@ -114,7 +114,8 @@ function Penilaian() {
           .schema('simbatik')
           .from('penilaian_indikator')
           .select('indikator_id')
-          .eq('user_id', userId);
+          .eq('user_id', userId)
+          .not('level_id', 'is', null);
       
 
       if (completedError) {
