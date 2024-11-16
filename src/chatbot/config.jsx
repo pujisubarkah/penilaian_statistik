@@ -1,4 +1,5 @@
 // config.js
+import React from "react";
 import { createChatBotMessage } from "react-chatbot-kit";
 import ActionProvider from "./ActionProvider";
 import MessageParser from "./MessageParser";
