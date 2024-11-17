@@ -17,7 +17,7 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"]  // Points to TypeScript files inside the 'src' folder
+  "include": ["src/**/*.ts"]
 }
 
 
