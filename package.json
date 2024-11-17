@@ -36,6 +36,7 @@
   "type": "module",
   "scripts": {
     "start": "vite",
+    "postinstall": "npm install typescript vite",
     "build": "yarn tsc && vite build",
     "serve": "vite preview"
   },
