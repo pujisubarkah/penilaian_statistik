@@ -17,8 +17,9 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],   // Make sure both .ts and .tsx files are included
-  "exclude": ["node_modules"]                   // Exclude node_modules or other unnecessary folders
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules"]
 }
+
 
   
