@@ -16,7 +16,7 @@ import { supabase } from './supabaseClient'; // Pastikan untuk mengimpor supabas
 
 function App() {
   const [isLoading, setIsLoading] = useState(false);
-  const [isChatbotOpen, setIsChatbotOpen] = useState(true);
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Menyimpan status login
   const location = useLocation();
 

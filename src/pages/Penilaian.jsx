@@ -18,6 +18,8 @@ function Penilaian() {
   const [tahunKegiatan, setTahunKegiatan] = useState("");
   const [subunitKerja, setsubunitKerja] = useState("");
   const [jenisKegiatan, setJenisKegiatan] = useState("");
+  const [deskripsi, setDeskripsi] = useState("");
+  const [linkPendukung, setLinkPendukung] = useState("");
   const [kegiatanList, setKegiatanList] = useState([]);
   const [unitKerja, setUnitKerja] = useState('');
 
@@ -54,6 +56,8 @@ function Penilaian() {
           sub_unitkerja: subunitKerja,
           tahun: tahunKegiatan,
           jenis_kegiatan: jenisKegiatan,
+          deskripsi: deskripsi,
+          link_pendukung: linkPendukung,
         },
       ]);
 
@@ -66,8 +70,18 @@ function Penilaian() {
         { kegiatan_statistik: namaKegiatan, 
           sub_unitkerja: subunitKerja,
           tahun: tahunKegiatan,
-          jenis_kegiatan: jenisKegiatan },
+          jenis_kegiatan: jenisKegiatan,
+          deskripsi: deskripsi,
+          link_pendukung: linkPendukung },
       ]);
+      // Reset form fields
+      setNamaKegiatan("");
+      setTahunKegiatan("");
+      setsubunitKerja("");
+      setJenisKegiatan("");
+      setDeskripsi("");
+      setLinkPendukung("");
+      setShowForm(false);
     }
   };
   
@@ -182,23 +196,47 @@ function Penilaian() {
     setTahunKegiatan(kegiatan.tahun);
     setsubunitKerja(kegiatan.sub_unitkerja);
     setJenisKegiatan(kegiatan.jenis_kegiatan);
+    setDeskripsi(kegiatan.deskripsi || "");
+    setLinkPendukung(kegiatan.link_pendukung || "");
+    setShowForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setNamaKegiatan("");
+    setTahunKegiatan("");
+    setsubunitKerja("");
+    setJenisKegiatan("");
+    setDeskripsi("");
+    setLinkPendukung("");
+    setShowForm(false);
+  };
+
+  const handleOpenNewForm = () => {
+    setNamaKegiatan("");
+    setTahunKegiatan("");
+    setsubunitKerja("");
+    setJenisKegiatan("");
+    setDeskripsi("");
+    setLinkPendukung("");
     setShowForm(true);
   };
 
    const ScrollingText = ({ text }) => {
     return (
-      <motion.div
-        className="whitespace-nowrap" // Pastikan teks tidak terputus di beberapa baris
-        initial={{ x: '100%' }} // Mulai dari luar layar di kanan
-        animate={{ x: '-100%' }} // Bergerak ke luar layar di kiri
-        transition={{
-          duration: 20, // Durasi pergerakan
-          repeat: Infinity, // Ulang terus menerus
-          ease: 'linear', // Pergerakan linier
-        }}
-      >
-        {text}
-      </motion.div>
+      <div className="overflow-hidden w-full">
+        <motion.div
+          className="whitespace-nowrap" // Pastikan teks tidak terputus di beberapa baris
+          initial={{ x: '100%' }} // Mulai dari luar layar di kanan
+          animate={{ x: '-100%' }} // Bergerak ke luar layar di kiri
+          transition={{
+            duration: 20, // Durasi pergerakan
+            repeat: Infinity, // Ulang terus menerus
+            ease: 'linear', // Pergerakan linier
+          }}
+        >
+          {text}
+        </motion.div>
+      </div>
     );
   };
 
@@ -258,7 +296,7 @@ function Penilaian() {
 
 
             <button
-              onClick={() => setShowForm(true)}
+              onClick={handleOpenNewForm}
               className="bg-teal-700 text-white px-4 py-2 rounded-md hover:bg-teal-500 mt-4"
             >
               Tambah Kegiatan Statistik
@@ -337,6 +375,38 @@ function Penilaian() {
                         <option value="Survei">Survei</option>
                       </select>
                     </div>
+                    <div className="mb-4">
+                      <label
+                        className="block text-gray-700 text-sm font-bold mb-2"
+                        htmlFor="deskripsi"
+                      >
+                        Deskripsi
+                      </label>
+                      <textarea
+                        id="deskripsi"
+                        value={deskripsi}
+                        onChange={(e) => setDeskripsi(e.target.value)}
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        rows="3"
+                        placeholder="Deskripsi kegiatan statistik..."
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label
+                        className="block text-gray-700 text-sm font-bold mb-2"
+                        htmlFor="linkPendukung"
+                      >
+                        Link Pendukung
+                      </label>
+                      <input
+                        type="url"
+                        id="linkPendukung"
+                        value={linkPendukung}
+                        onChange={(e) => setLinkPendukung(e.target.value)}
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        placeholder="https://example.com"
+                      />
+                    </div>
                     <div className="flex items-center justify-between">
                       <button
                         type="submit"
@@ -346,7 +416,7 @@ function Penilaian() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setShowForm(false)}
+                        onClick={handleCloseForm}
                         className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-400"
                       >
                         Batal

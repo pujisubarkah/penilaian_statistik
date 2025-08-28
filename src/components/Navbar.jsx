@@ -121,8 +121,8 @@ function Navbar() {
 
       {/* Login Form Overlay */}
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-8 rounded shadow-lg w-1/3">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]">
+          <div className="bg-white p-8 rounded shadow-lg w-1/3 relative z-[10000]">
             <Login isOpen={isModalOpen} onClose={closeModal} onLoginSuccess={(loggedInUser) => {
               setUser(loggedInUser);
               closeModal();
